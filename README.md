@@ -46,9 +46,9 @@ Representa una parcela catastral.
 
 * `rc (str, opcional)`: La referencia catastral de la parcela. Por defecto es `None`. Puede ser proporcionada
 sola; también puede haber otros parámetros para buscar una parcela específica en el sistema.
-* `provincia (int|str, opcional)`: El código o nombre de la provincia. Por defecto es `None`.  Se usa para
+* `provincia (str, opcional)`: El nombre de la provincia. Por defecto es `None`.  Se usa para
 buscar por dirección o parcela.
-* `municipio (int|str, opcional)`: El código o nombre del municipio. Por defecto es `None`. Se usa para buscar
+* `municipio (str, opcional)`: El nombre del municipio. Por defecto es `None`. Se usa para buscar
 por dirección o parcela.
 
 
@@ -100,9 +100,9 @@ Catastrales más pequeñas).
 
 *  `rc (str|None)`: La referencia catastral de la MetaParcela. Puede ser proporcionada como `None`.
 * `provincia (str|None)`:  El nombre de la provincia donde se encuentra la MetaParcela. Por
-defecto, es `None`, lo que permite usar nombres o códigos generales.
+defecto, es `None`, lo que permite usar nombres generales.
 * `municipio (str|None)`: El nombre del municipio donde se encuentra la MetaParcela. Por
-defecto, es `None`, lo que permite usar nombres o códigos generales.
+defecto, es `None`, lo que permite usar nombres generales.
 * `poligono (int|None)`: El número del polígono en el que se encuentra la MetaParcela. Se utiliza para encontrar
 una parcela específica.
 * `parcela (int|None)`: El número de parcelas dentro de la MetaParcela. Se utiliza para encontrar una parcela
@@ -254,7 +254,7 @@ Sigue las instrucciones de CONTRIBUTING.md y el Código de Conducta.
 - Al Catastro por hacer un Endpoint público.
 - A GISCE-TI por currarse [una librería similar][1], basándose en los endpoints JSON.
 - A mi abuelo y mi tío por pedirme que os eche una mano buscando tierras.
-- A [Juanlu Cano][2] por extender la idea en la PyConES a esta librería.
+- A [Juanlu Cano][2] por darme la idea de extender el primer concepto en la PyConES para convertirlo en esta librería.
 - A [Jaime Gómez-Obregón][3] por animar de forma muuuy indirecta a "hackear las Administraciones públicas".
 
 [1]: https://github.com/gisce/pycatastro
