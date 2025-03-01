@@ -1,7 +1,7 @@
 import requests
 import json
 
-from .statics import URL_BASE_CALLEJERO, MAPEOS_PROVINCIAS, TIPOS_VIA
+from .statics import URL_BASE_CALLEJERO, MAPEOS_PROVINCIAS, TIPOS_VIA, SISTEMAS_REFERENCIA
 from .exceptions import lanzar_excepcion
 
 def comprobar_errores(respuesta: dict):
@@ -100,3 +100,11 @@ def listar_calles(provincia: str, municipio: str):
         else:
             return []
     else: return []
+
+def listar_sistemas_referencia():
+    """
+    Devuelve una lista de sistemas de referencia disponibles.
+    Returns:
+        list: Una lista de sistemas de referencia disponibles.
+    """
+    return [key for key in SISTEMAS_REFERENCIA.keys()]

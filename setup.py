@@ -9,7 +9,7 @@ DESCRIPTION = 'Description'
 PACKAGE_NAME = 'ESCatastroLib'
 AUTHOR = 'Iván V.R'
 EMAIL = 'IvanVR@protonmail.com'
-GITHUB_URL = 'github.com/IvanitiX/ESCatastroLib'
+GITHUB_URL = 'https://github.com/IvanitiX/ESCatastroLib'
 
 setup(
     name = PACKAGE_NAME,
@@ -31,7 +31,6 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
-        'License :: OSI Approved :: Apache License',
         'Programming Language :: Python :: 3',
     ],
 )

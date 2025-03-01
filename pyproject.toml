@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ESCatastroLib"
+dynamic = ["version"]
+description = "Una librería de Python para consultar los datos del Catastro COMO OBJETOS. Incluye información geográfica."
+readme = "README.md"
+license = {text = "Apache License (2.0)"}
+authors = [
+    { name = "Iván V.R", email = "IvanVR@protonmail.com" },
+]
+keywords = ["espana", "spain", "catastro", "gis"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Natural Language :: Spanish",
+    "Framework :: Pytest",
+]
+dependencies = [
+    "requests",
+    "xml2dict",
+    "folium"
+]
+
+[project.urls]
+Homepage = "https://github.com/IvanitiX/ESCatastroLib"
+
+[tool.hatch.version]
+path = "escatastrolib/__init__.py"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/escatastrolib",
+]
+
+[publish.index.repos.main]
+url = "https://upload.pypi.org/legacy/"
+
+[publish.index.repos.test]
+url = "https://test.pypi.org/legacy/"

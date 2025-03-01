@@ -120,3 +120,20 @@ TIPOS_VIA = {
     "VL": "VIAL",
     "VR": "VEREDA"
 }
+
+SISTEMAS_REFERENCIA = {
+    'EPSG:4230': 'Geográficas en ED 50',
+    'EPSG:4326': 'Geográficas en WGS 80',
+    'EPSG:4258': 'Geográficas en ETRS89',
+    'EPSG:32627': 'UTM huso 27N en WGS 84',
+    'EPSG:32628': 'UTM huso 28N en WGS 84',
+    'EPSG:32629': 'UTM huso 29N en WGS 84',
+    'EPSG:32630': 'UTM huso 30N en WGS 84',
+    'EPSG:32631': 'UTM huso 31N en WGS 84',
+    'EPSG:25829': 'UTM huso 29N en ETRS89',
+    'EPSG:25830': 'UTM huso 30N en ETRS89',
+    'EPSG:25831': 'UTM huso 31N en ETRS89',
+    'EPSG:23029': 'UTM huso 29N en ED50',
+    'EPSG:23030': 'UTM huso 30N en ED50',
+    'EPSG:23031': 'UTM huso 31N en ED50'
+}

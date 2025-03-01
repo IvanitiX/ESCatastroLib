@@ -3,7 +3,7 @@ import json
 import xmltodict
 
 from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS
-from ..utils.utils import comprobar_errores
+from ..utils.utils import comprobar_errores, listar_sistemas_referencia
 from ..utils.exceptions import ErrorServidorCatastro
 from .Calle import Calle, Municipio
 
@@ -61,7 +61,7 @@ class ParcelaCatastral:
                     })
 
 
-    def __create_geometry(self):
+    def __create_geometry(self, projection: str = 'EPSG:4326'):
         geometry_request = requests.get(f'{URL_BASE_GEOGRAFIA}',
                                         params={
                                             'service':'wfs',
@@ -69,7 +69,7 @@ class ParcelaCatastral:
                                             'request':'getfeature',
                                             'STOREDQUERIE_ID':'GetParcel',
                                             'refcat': self.rc,
-                                            'srsname': 'EPSG:4326'
+                                            'srsname': projection
                                         })
 
         geometry = xmltodict.parse(geometry_request.content)
@@ -86,7 +86,7 @@ class ParcelaCatastral:
             } for idx in range(len(parcel_geometry)//2)
         ]
 
-    def __create_from_rc(self, rc: str):
+    def __create_from_rc(self, rc: str, projection: str):
         """Create an instance of InfoCatastral from a RC (Referencia Catastral) string."""
         req1 = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPRC',
                             params={'RefCat': rc})
@@ -113,11 +113,11 @@ class ParcelaCatastral:
                     self.nombre_paraje = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('npa')
                 
                 self.__create_regions(info_cadastre)
-                self.__create_geometry()
+                self.__create_geometry(projection)
 
                 self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
 
-    def __create_from_parcel(self, provincia: str|None, municipio: str|None, poligono: str|None, parcela: str|None):
+    def __create_from_parcel(self, provincia: str|None, municipio: str|None, poligono: str|None, parcela: str|None, projection: str):
         """Create an instance of InfoCatastral from a parcela string."""
         req = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPPP',
                            params={
@@ -135,9 +135,9 @@ class ParcelaCatastral:
                 raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
             else:
                 self.rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('bico').get('bi').get('idbi').get('rc').values())
-                self.__create_from_rc(self.rc)
+                self.__create_from_rc(self.rc, projection)
 
-    def __create_from_address(self, provincia: str|None, municipio: str|None, tipo_via: str|None, calle: str|None, numero: str|None):
+    def __create_from_address(self, provincia: str|None, municipio: str|None, tipo_via: str|None, calle: str|None, numero: str|None, projection: str):
         """Create an instance of InfoCatastral from an address string."""
         info_calle = Calle(
             municipio=Municipio(
@@ -169,7 +169,7 @@ class ParcelaCatastral:
                         self.rc = ''.join(info_cadastre.get('consulta_dnplocResult').get('lrcdnp').get('rcdnp')[0].get('rc').values())
                     elif 'bico' in info_cadastre.get('consulta_dnplocResult'):
                         self.rc = ''.join(info_cadastre.get('consulta_dnplocResult').get('bico').get('bi').get('idbi').get('rc').values())
-                    self.__create_from_rc(self.rc)
+                    self.__create_from_rc(self.rc, projection)
             elif 'lerr' in json.loads(req.content).get('consulta_dnplocResult') and json.loads(req.content)['consulta_dnplocResult']['lerr'][0]['cod'] == '43':
                 info_cadastre = json.loads(req.content)
                 raise Exception(f"Ese número no existe. Prueba con alguno de estos: {[num.get('num').get('pnp') for num in info_cadastre.get('consulta_dnplocResult').get('numerero').get('nump')]}")
@@ -178,22 +178,24 @@ class ParcelaCatastral:
         else:
             raise Exception('La calle no existe.')
 
-    def __init__(self, rc: str|None = None, provincia: int|str|None = None, municipio: int|str|None = None, poligono: int|None = None, parcela: int|None = None, tipo_via: str|None = None, calle: str|None = None, numero: str|None = None):
+    def __init__(self, rc: str|None = None, provincia: int|str|None = None, municipio: int|str|None = None, poligono: int|None = None, parcela: int|None = None, tipo_via: str|None = None, calle: str|None = None, numero: str|None = None, projection: str = 'EPSG:4326'):
+        if projection not in listar_sistemas_referencia():
+            raise ValueError(f"El sistema de referencia {projection} no existe. Los sistemas de referencia disponibles son: {listar_sistemas_referencia()}")
         if rc:
             self.rc = rc
-            self.__create_from_rc(rc)
+            self.__create_from_rc(rc, projection)
         elif provincia and municipio and poligono and parcela:
             self.provincia = provincia
             self.municipio = municipio
             self.poligono = poligono
             self.parcela = parcela
-            self.__create_from_parcel(provincia, municipio, poligono, parcela)
+            self.__create_from_parcel(provincia, municipio, poligono, parcela, projection)
         elif provincia and municipio and tipo_via and calle and numero:
             self.provincia = provincia
             self.municipio = municipio
             self.calle = calle
             self.numero = numero
-            self.__create_from_address(provincia, municipio, tipo_via, calle, numero)
+            self.__create_from_address(provincia, municipio, tipo_via, calle, numero, projection)
         else:
             raise ValueError("No se ha proporcionado suficiente información para realizar la búsqueda")
         
