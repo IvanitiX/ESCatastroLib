@@ -23,27 +23,46 @@ classifiers = [
     "Framework :: Pytest",
 ]
 dependencies = [
+    "pytest",
     "requests",
-    "xml2dict",
+    "xmltodict",
     "folium"
 ]
 
+
 [project.urls]
-Homepage = "https://github.com/IvanitiX/ESCatastroLib"
+Documentation = "https://github.com/IvanitiX/ESCatastroLib#readme"
+Issues = "https://github.com/IvanitiX/ESCatastroLib/issues"
+Source = "https://github.com/IvanitiX/ESCatastroLib"
 
 [tool.hatch.version]
-path = "escatastrolib/__init__.py"
+path = "src/escatastrolib/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/escatastrolib tests}"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 
-[tool.hatch.build.targets.sdist]
-include = [
-    "/escatastrolib",
+[tool.coverage.run]
+source_pkgs = ["escatastrolib", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/escatastrolib/__about__.py",
 ]
 
-[publish.index.repos.main]
-url = "https://upload.pypi.org/legacy/"
+[tool.coverage.paths]
+escatastrolib = ["src/escatastrolib", "*/escatastrolib/src/escatastrolib"]
+tests = ["tests", "*/escatastrolib/tests"]
 
-[publish.index.repos.test]
-url = "https://test.pypi.org/legacy/"
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

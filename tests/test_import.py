@@ -1,6 +1,6 @@
 # test_import.py
 try:
-    from ESCatastroLib import Calle
+    from escatastrolib import Calle
     print("Import successful")
 except ModuleNotFoundError as e:
     print(f"ModuleNotFoundError: {e}")

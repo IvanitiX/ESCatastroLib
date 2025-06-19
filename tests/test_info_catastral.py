@@ -1,6 +1,6 @@
 import pytest
-from ESCatastroLib import ParcelaCatastral
-from ESCatastroLib.utils import ErrorServidorCatastro
+from escatastrolib import ParcelaCatastral
+from escatastrolib.utils import ErrorServidorCatastro
 
 def test_valid_info_urban_catastral_initialization_rc():
     info = ParcelaCatastral(rc='1541506VK4714B0002PK')

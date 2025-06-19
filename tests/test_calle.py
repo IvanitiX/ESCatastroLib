@@ -1,5 +1,5 @@
 import pytest
-from ESCatastroLib import Calle, Municipio
+from escatastrolib import Municipio, Calle
 
 def test_valid_calle_initialization():
     municipio = Municipio(provincia='Madrid', municipio='Madrid')

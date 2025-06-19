@@ -1,5 +1,5 @@
 import pytest
-from ESCatastroLib.utils import listar_provincias, listar_municipios, comprobar_errores, ErrorServidorCatastro
+from escatastrolib.utils import listar_provincias, listar_municipios, comprobar_errores, ErrorServidorCatastro
 
 def test_listar_municipios_valid_provincia():
     # Assuming 'Madrid' is a valid province in the MAPEOS_PROVINCIAS

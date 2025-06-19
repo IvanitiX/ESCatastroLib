@@ -177,8 +177,8 @@ Devuelve una lista de calles para una provincia y municipio dados.
 ¡Buena pregunta! Os dejo algunos ejemplos:
 
 ```python
-from ESCatastroLib import Municipio, Calle, ParcelaCatastral, MetaParcela
-from ESCatastroLib.utils import listar_provincias, listar_tipos_via, listar_calles, listar_municipios
+from escatastrolib import Municipio, Calle, ParcelaCatastral, MetaParcela
+from escatastrolib.utils import listar_provincias, listar_tipos_via, listar_calles, listar_municipios
 
 print(listar_provincias())
 # > ['A CORUÑA', 'ALACANT', 'ALBACETE', 'ALMERIA', 'ASTURIAS', 'AVILA', 'BADAJOZ', ...]

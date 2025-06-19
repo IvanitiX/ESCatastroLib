@@ -1,5 +1,5 @@
 import pytest
-from ESCatastroLib import Municipio
+from escatastrolib import Municipio
 
 def test_valid_municipio_initialization():
     municipio = Municipio(provincia='Madrid', municipio='Madrid')
