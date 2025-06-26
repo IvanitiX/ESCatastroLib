@@ -1,7 +1,7 @@
 import requests
 import json
 
-from .statics import URL_BASE_CALLEJERO, MAPEOS_PROVINCIAS, TIPOS_VIA, SISTEMAS_REFERENCIA
+from .statics import URL_BASE_CALLEJERO, MAPEOS_PROVINCIAS, TIPOS_VIA, SISTEMAS_REFERENCIA, URL_BASE_COORDENADAS, URL_BASE_CARTOCIUDAD_GEOCODER
 from .exceptions import lanzar_excepcion
 
 def comprobar_errores(respuesta: dict):
@@ -108,3 +108,83 @@ def listar_sistemas_referencia():
         list: Una lista de sistemas de referencia disponibles.
     """
     return [key for key in SISTEMAS_REFERENCIA.keys()]
+
+def convertir_coordenadas_a_rc(lat: float, lon: float, sr: str = 'EPSG:4326'):
+    """
+    Convierte coordenadas X e Y a una referencia catastral (RC).
+    
+    Args:
+        lat (float): Latitud.
+        lon (float): Longitud.
+        sr (str): Sistema de referencia. Por defecto es 'EPSG:4326'.
+        
+    Returns:
+        str: Referencia catastral (RC).
+    """
+    response = requests.get(f'{URL_BASE_COORDENADAS}/Consulta_RCCOOR',
+                            params={
+                                'CoorX': lon,
+                                'CoorY': lat,
+                                'SRS': sr
+                            })
+    if response.status_code == 200 and comprobar_errores(response.json()):
+        return ''.join([part for part in response.json().get('Consulta_RCCOORResult').get('coordenadas').get('coord')[0].get('pc').values()])
+    else:
+        return None
+    
+def convertir_rc_a_coordenadas(rc: str, sr: str = 'EPSG:4326'):
+    """
+    Convierte una referencia catastral (RC) a coordenadas X e Y.
+    Args:
+        rc (str): Referencia catastral.
+        sr (str): Sistema de referencia. Por defecto es 'EPSG:4326'.
+    Returns:
+        dict: Un diccionario con las coordenadas X e Y.
+    """
+    if len(rc) > 14:
+        rc_corregido = rc[0:14]
+    else: rc_corregido = rc
+
+    response = requests.get(f'{URL_BASE_COORDENADAS}/Consulta_CPMRC',
+                            params={
+                                'RefCat': rc_corregido,
+                                'SRS': sr
+                            })
+    if response.status_code == 200 and comprobar_errores(response.json()):
+        coordenadas = response.json().get('Consulta_CPMRCResult').get('coordenadas').get('coord')[0].get('geo')
+        return {
+            'x': coordenadas.get('xcen'),
+            'y': coordenadas.get('ycen')
+        }
+    else:
+        return None
+    
+def geocodificar_direccion(direccion: str, municipio: str = None):
+    """
+    Geocodifica una dirección utilizando el servicio de CartoCiudad.
+    
+    Args:
+        direccion (str): La dirección a geocodificar.
+        provincia (str, optional): La provincia de la dirección. Por defecto es None.
+        municipio (str, optional): El municipio de la dirección. Por defecto es None.
+        
+    Returns:
+        dict: Un diccionario con las coordenadas X e Y y otros datos relevantes.
+    """
+    
+    response = requests.get(f'{URL_BASE_CARTOCIUDAD_GEOCODER}/findJsonp', 
+                            params = {
+                                'q': f'{direccion}, {municipio}'
+                            })
+    
+    if response.status_code == 200:
+        data = json.loads(response.content.decode('utf-8').replace('callback(', '').replace(')', ''))
+        return {
+            'x': data.get('lat'),
+            'y': data.get('lng'),
+            'rc': data.get('refCatastral')
+        }
+    else:
+        return None
+            
+
