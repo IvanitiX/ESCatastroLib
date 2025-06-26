@@ -38,7 +38,7 @@ class ParcelaCatastral:
         uso (str): El uso de la parcela (solo para parcelas urbanas).
         nombre_paraje (str): El nombre del paraje (solo para parcelas rústicas).
         regiones (list): Una lista de regiones de la parcela, cada una con una descripción y superficie.
-        geocentro (dict): Las coordenadas del geocentro de la parcela.
+        centroide (dict): Las coordenadas del centroide de la parcela.
         geometria (list): Una lista de puntos que representan la geometría de la parcela.
     """
 
@@ -74,7 +74,7 @@ class ParcelaCatastral:
 
         geometry = xmltodict.parse(geometry_request.content)
         geoposition = geometry.get('FeatureCollection').get('member').get('cp:CadastralParcel').get('cp:referencePoint').get('gml:Point').get('gml:pos').split(' ')
-        self.geocentro = {
+        self.centroide = {
             'x': geoposition[0],
             'y': geoposition[1]
         }
@@ -98,6 +98,7 @@ class ParcelaCatastral:
             if cudnp > 1:
                 raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
             else:
+                self.rc = ''.join(info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('rc').values())
                 self.url_croquis = requests.get(URL_BASE_CROQUIS_DATOS, params={'refcat': self.rc}).url
                 self.municipio = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('nm')
                 self.provincia = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('np')

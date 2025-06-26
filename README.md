@@ -86,7 +86,7 @@ referencia a una MetaParcela.
 * `uso (str)`:  El uso de la parcela (solo en lotes urbanos)
 * `nombre_paraje (str)`:  El nombre del área, solo se usa para terrenos rurales.
 * `regiones (list)`: Una lista de regiones en la parcela con una descripción y superficie.
-* `geocentro (dict)`:  Las coordenadas del centro de la parcela. (Latitud y longitud)
+* `centroide (dict)`:  Las coordenadas del centroide de la parcela. (Latitud y longitud)
 * `geometria (list)`:  Una lista de puntos que representan la geometría de la parcela. (Latitud y longitud)
 
 
@@ -220,13 +220,13 @@ pc = ParcelaCatastral(rc='22113U490470815583UK')
 # [!] ErrorServidorCatastro: Error del Catastro. NO EXISTE NINGÚN INMUEBLE CON LOS PARÁMETROS INDICADOS
 
 pc = ParcelaCatastral(rc='28067A023001490000FJ')
-# [OK] {'rc': '28067A023001490000FJ', 'url_croquis': 'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx?refcat=28067A023001490000FJ', 'municipio': 'GUADALIX DE LA SIERRA', 'provincia': 'MADRID', 'tipo': 'Rústico', 'parcela': '149', 'poligono': '23', 'nombre_paraje': 'PE¥ARRUBIA', 'regiones': [{'descripcion': 'PRADOS O PRADERAS', 'superficie': '250266'}, {'descripcion': 'MONTE BAJO', 'superficie': '187652'}, {'descripcion': 'PASTOS', 'superficie': '1814'}], 'geocentro': {'x': '40.76845', 'y': '-3.672895'}, 'geometria': [{'x': '40.764879', 'y': '-3.678524'}, {'x': '40.765874', 'y': '-3.678059'}, ...], 'superficie': 439732.0}
+# [OK] {'rc': '28067A023001490000FJ', 'url_croquis': 'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx?refcat=28067A023001490000FJ', 'municipio': 'GUADALIX DE LA SIERRA', 'provincia': 'MADRID', 'tipo': 'Rústico', 'parcela': '149', 'poligono': '23', 'nombre_paraje': 'PE¥ARRUBIA', 'regiones': [{'descripcion': 'PRADOS O PRADERAS', 'superficie': '250266'}, {'descripcion': 'MONTE BAJO', 'superficie': '187652'}, {'descripcion': 'PASTOS', 'superficie': '1814'}], 'centroide': {'x': '40.76845', 'y': '-3.672895'}, 'geometria': [{'x': '40.764879', 'y': '-3.678524'}, {'x': '40.765874', 'y': '-3.678059'}, ...], 'superficie': 439732.0}
 
 pc = ParcelaCatastral(rc='1541506VK4714B0002PK')
-# [OK] {'rc': '1541506VK4714B0002PK', 'url_croquis': 'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx?refcat=1541506VK4714B0002PK', 'municipio': 'MADRID', 'provincia': 'MADRID', 'tipo': 'Urbano', 'calle': 'CL ALFONSO XII', 'numero': '34', 'antiguedad': '1915', 'uso': 'Almacen-Estacionamiento.Uso Residencial', 'regiones': [{'descripcion': 'APARCAMIENTO', 'superficie': '37'}, {'descripcion': 'ELEMENTOS COMUNES', 'superficie': '2'}], 'geocentro': {'x': '40.414193', 'y': '-3.689266'}, 'geometria': [{'x': '40.414358', 'y': '-3.689164'}, {'x': '40.414359', 'y': '-3.689094'}, {'x': '40.414288', 'y': '-3.689092'}, ...], 'superficie': 39.0}
+# [OK] {'rc': '1541506VK4714B0002PK', 'url_croquis': 'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx?refcat=1541506VK4714B0002PK', 'municipio': 'MADRID', 'provincia': 'MADRID', 'tipo': 'Urbano', 'calle': 'CL ALFONSO XII', 'numero': '34', 'antiguedad': '1915', 'uso': 'Almacen-Estacionamiento.Uso Residencial', 'regiones': [{'descripcion': 'APARCAMIENTO', 'superficie': '37'}, {'descripcion': 'ELEMENTOS COMUNES', 'superficie': '2'}], 'centroide': {'x': '40.414193', 'y': '-3.689266'}, 'geometria': [{'x': '40.414358', 'y': '-3.689164'}, {'x': '40.414359', 'y': '-3.689094'}, {'x': '40.414288', 'y': '-3.689092'}, ...], 'superficie': 39.0}
 
 pc = ParcelaCatastral(provincia='Granada', municipio='Baza', poligono=16, parcela=128)
-# [OK] {'provincia': 'GRANADA', 'municipio': 'BAZA', 'poligono': '16', 'parcela': '128', 'rc': '18024A016001280000GY', 'url_croquis': 'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx?refcat=18024A016001280000GY', 'tipo': 'Rústico', 'nombre_paraje': 'BAICO', 'regiones': [{'descripcion': 'LABOR O LABRADÍO REGADÍO', 'superficie': '14608'}], 'geocentro': {'x': '37.544352', 'y': '-2.742683'}, 'geometria': [{'x': '37.543611', 'y': '-2.74347'}, {'x': '37.543717', 'y': '-2.743522'}, {'x': '37.543945', 'y': '-2.743435'}, ...], 'superficie': 14608.0}
+# [OK] {'provincia': 'GRANADA', 'municipio': 'BAZA', 'poligono': '16', 'parcela': '128', 'rc': '18024A016001280000GY', 'url_croquis': 'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx?refcat=18024A016001280000GY', 'tipo': 'Rústico', 'nombre_paraje': 'BAICO', 'regiones': [{'descripcion': 'LABOR O LABRADÍO REGADÍO', 'superficie': '14608'}], 'centroide': {'x': '37.544352', 'y': '-2.742683'}, 'geometria': [{'x': '37.543611', 'y': '-2.74347'}, {'x': '37.543717', 'y': '-2.743522'}, {'x': '37.543945', 'y': '-2.743435'}, ...], 'superficie': 14608.0}
 
 
 pc = ParcelaCatastral(provincia='Madrid', municipio='Madrid', poligono='1', parcela='1')
@@ -240,7 +240,7 @@ pc = ParcelaCatastral(provincia='Granada', municipio='Guadix', tipo_via='CL', ca
 
 
 pc = ParcelaCatastral(provincia='Granada', municipio='Guadix', tipo_via='PZ', calle='Catedral', numero=1)
-# [OK] {'provincia': 'GRANADA', 'municipio': 'GUADIX', 'calle': 'PZ CATEDRAL', 'numero': '1', 'rc': '8085801VG8288E0001FA', 'url_croquis': 'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx?refcat=8085801VG8288E0001FA', 'tipo': 'Urbano', 'antiguedad': '1750', 'uso': 'Religioso', 'regiones': [{'descripcion': 'RELIGIOSO', 'superficie': '3308'}], 'geocentro': {'x': '37.301262', 'y': '-3.136249'}, 'geometria': [{'x': '37.301298', 'y': '-3.136662'}, {'x': '37.301316', 'y': '-3.136699'}, {'x': '37.301376', 'y': '-3.136711'}, ...], 'superficie': 3308.0}
+# [OK] {'provincia': 'GRANADA', 'municipio': 'GUADIX', 'calle': 'PZ CATEDRAL', 'numero': '1', 'rc': '8085801VG8288E0001FA', 'url_croquis': 'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx?refcat=8085801VG8288E0001FA', 'tipo': 'Urbano', 'antiguedad': '1750', 'uso': 'Religioso', 'regiones': [{'descripcion': 'RELIGIOSO', 'superficie': '3308'}], 'centroide': {'x': '37.301262', 'y': '-3.136249'}, 'geometria': [{'x': '37.301298', 'y': '-3.136662'}, {'x': '37.301316', 'y': '-3.136699'}, {'x': '37.301376', 'y': '-3.136711'}, ...], 'superficie': 3308.0}
 
 mp = MetaParcela(provincia='Granada', municipio='Guadix', tipo_via='CL', calle='Largacha', numero=6)
 # [OK] {'provincia': 'Granada', 'municipio': 'Guadix', 'calle': 'Largacha', 'numero': 6, 'parcelas': [<ESCatastroLib.models.InfoCatastral.ParcelaCatastral object at 0x7ff4441944c0>, <ESCatastroLib.models.InfoCatastral.ParcelaCatastral object at 0x7ff44507e770>, <ESCatastroLib.models.InfoCatastral.ParcelaCatastral object at 0x7ff444194160>, <ESCatastroLib.models.InfoCatastral.ParcelaCatastral object at 0x7ff44507e110>]}
