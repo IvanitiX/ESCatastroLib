@@ -1,4 +1,5 @@
 from ..utils.utils import listar_municipios
+from typing import Union
 
 class Municipio:
     """
@@ -13,7 +14,7 @@ class Municipio:
         Exception: Si no se especifica el municipio o si el municipio especificado no está disponible o si no se ha especificado completamente (te dará una lista de coincidencias).
     """
 
-    def __init__(self, provincia: str, municipio: str|None = None):
+    def __init__(self, provincia: str, municipio: Union[str,None] = None):
         municipios = listar_municipios(provincia=provincia,municipio=municipio)
 
         if municipio:

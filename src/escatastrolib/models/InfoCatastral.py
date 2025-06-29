@@ -2,6 +2,8 @@ import requests
 import json
 import xmltodict
 
+from typing import Union
+
 from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS
 from ..utils.utils import comprobar_errores, listar_sistemas_referencia
 from ..utils.exceptions import ErrorServidorCatastro
@@ -75,14 +77,14 @@ class ParcelaCatastral:
         geometry = xmltodict.parse(geometry_request.content)
         geoposition = geometry.get('FeatureCollection').get('member').get('cp:CadastralParcel').get('cp:referencePoint').get('gml:Point').get('gml:pos').split(' ')
         self.centroide = {
-            'x': geoposition[0],
-            'y': geoposition[1]
+            'x': geoposition[1],
+            'y': geoposition[0]
         }
         parcel_geometry = geometry.get('FeatureCollection').get('member').get('cp:CadastralParcel').get('cp:geometry').get('gml:MultiSurface').get('gml:surfaceMember').get('gml:Surface').get('gml:patches').get('gml:PolygonPatch').get('gml:exterior').get('gml:LinearRing').get('gml:posList').get('#text').split(' ')
         self.geometria = [
             {
-                'x': parcel_geometry[2*idx],
-                'y': parcel_geometry[2*idx+1]
+                'x': parcel_geometry[2*idx+1],
+                'y': parcel_geometry[2*idx]
             } for idx in range(len(parcel_geometry)//2)
         ]
 
@@ -118,7 +120,7 @@ class ParcelaCatastral:
 
                 self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
 
-    def __create_from_parcel(self, provincia: str|None, municipio: str|None, poligono: str|None, parcela: str|None, projection: str):
+    def __create_from_parcel(self, provincia: Union[str,None], municipio: Union[str,None], poligono: Union[str,None], parcela: Union[str,None], projection: str):
         """Create an instance of InfoCatastral from a parcela string."""
         req = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPPP',
                            params={
@@ -138,7 +140,7 @@ class ParcelaCatastral:
                 self.rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('bico').get('bi').get('idbi').get('rc').values())
                 self.__create_from_rc(self.rc, projection)
 
-    def __create_from_address(self, provincia: str|None, municipio: str|None, tipo_via: str|None, calle: str|None, numero: str|None, projection: str):
+    def __create_from_address(self, provincia: Union[str,None], municipio: Union[str,None], tipo_via: Union[str,None], calle: Union[str,None], numero: Union[str,None], projection: str):
         """Create an instance of InfoCatastral from an address string."""
         info_calle = Calle(
             municipio=Municipio(
@@ -179,7 +181,7 @@ class ParcelaCatastral:
         else:
             raise Exception('La calle no existe.')
 
-    def __init__(self, rc: str|None = None, provincia: int|str|None = None, municipio: int|str|None = None, poligono: int|None = None, parcela: int|None = None, tipo_via: str|None = None, calle: str|None = None, numero: str|None = None, projection: str = 'EPSG:4326'):
+    def __init__(self, rc: Union[str,None] = None, provincia: Union[str,None] = None, municipio: Union[int,str,None] = None, poligono: Union[int,None] = None, parcela: Union[int,None] = None, tipo_via: Union[str,None] = None, calle: Union[str,None] = None, numero: Union[str,None] = None, projection: str = 'EPSG:4326'):
         if projection not in listar_sistemas_referencia():
             raise ValueError(f"El sistema de referencia {projection} no existe. Los sistemas de referencia disponibles son: {listar_sistemas_referencia()}")
         if rc:
@@ -206,15 +208,15 @@ class MetaParcela:
     varias referencias catastrales (Parcelas Catastrales más pequeñas).
 
     Args:
-        rc (str|None): La referencia catastral de la MetaParcela.
+        rc (Union[str,None]): La referencia catastral de la MetaParcela.
 
-        provincia (int|str|None): El nombre de la provincia donde se encuentra la MetaParcela.
-        municipio (int|str|None): El nombre del municipio donde se encuentra la MetaParcela.
-        poligono (int|None): El número de polígono de la MetaParcela. Sólo se usa para buscar por parcela.
-        parcela (int|None): El número de parcela de la MetaParcela. Sólo se usa para buscar por parcela.
-        tipo_via (str|None): El tipo de vía de la dirección de la MetaParcela. Sólo se usa para buscar por dirección.
-        calle (str|None): El nombre de la calle de la dirección de la MetaParcela. Sólo se usa para buscar por dirección.
-        numero (str|None): El número de la dirección de la MetaParcela. Sólo se usa para buscar por dirección.
+        provincia (int|Union[str,None]): El nombre de la provincia donde se encuentra la MetaParcela.
+        municipio (int|Union[str,None]): El nombre del municipio donde se encuentra la MetaParcela.
+        poligono (Union[int,None]): El número de polígono de la MetaParcela. Sólo se usa para buscar por parcela.
+        parcela (Union[int,None]): El número de parcela de la MetaParcela. Sólo se usa para buscar por parcela.
+        tipo_via (Union[str,None]): El tipo de vía de la dirección de la MetaParcela. Sólo se usa para buscar por dirección.
+        calle (Union[str,None]): El nombre de la calle de la dirección de la MetaParcela. Sólo se usa para buscar por dirección.
+        numero (Union[str,None]): El número de la dirección de la MetaParcela. Sólo se usa para buscar por dirección.
     Attributes:
         rc (str): La referencia catastral de la MetaParcela.
         parcelas (list): Una lista de ParcelaCatastral que representan las parcelas que componen la MetaParcela.
@@ -235,7 +237,7 @@ class MetaParcela:
                 self.parcelas.append(ParcelaCatastral(rc=rc))
                 
 
-    def __create_from_parcel(self, provincia: str|None, municipio: str|None, poligono: str|None, parcela: str|None):
+    def __create_from_parcel(self, provincia: Union[str,None], municipio: Union[str,None], poligono: Union[str,None], parcela: Union[str,None]):
         """Create an instance of InfoCatastral from a parcela string."""
         req = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPPP',
                            params={
@@ -253,7 +255,7 @@ class MetaParcela:
                 rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
                 self.parcelas.append(ParcelaCatastral(rc=rc))
 
-    def __create_from_address(self, provincia: str|None, municipio: str|None, tipo_via: str|None, calle: str|None, numero: str|None):
+    def __create_from_address(self, provincia: Union[str,None], municipio: Union[str,None], tipo_via: Union[str,None], calle: Union[str,None], numero: Union[str,None]):
         """Create an instance of InfoCatastral from an address string."""
         info_calle = Calle(
             municipio=Municipio(
@@ -285,7 +287,7 @@ class MetaParcela:
         else:
             raise Exception('La calle no existe.')
 
-    def __init__(self, rc: str|None = None, provincia: int|str|None = None, municipio: int|str|None = None, poligono: int|None = None, parcela: int|None = None, tipo_via: str|None = None, calle: str|None = None, numero: str|None = None):
+    def __init__(self, rc: Union[str,None] = None, provincia: Union[int,str,None] = None, municipio: Union[int,str,None] = None, poligono: Union[int,None] = None, parcela: Union[int,None] = None, tipo_via: Union[str,None] = None, calle: Union[str,None] = None, numero: Union[str,None] = None):
         if rc:
             self.rc = rc
             self.__create_from_rc(rc)

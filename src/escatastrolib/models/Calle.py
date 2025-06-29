@@ -5,6 +5,8 @@ from ..utils.utils import comprobar_errores
 import requests
 import json
 
+from typing import Union
+
 class Calle:
     """
     Clase que representa una calle.
@@ -22,7 +24,7 @@ class Calle:
         municipio (Municipio): Objeto que representa el municipio al que pertenece la calle.
     """
 
-    def __init__(self, municipio: Municipio, nombre_calle: str|None = None, tipo_via: str|None = None):
+    def __init__(self, municipio: Municipio, nombre_calle: Union[str,None] = None, tipo_via: Union[str,None] = None):
         uri = f'{URL_BASE_CALLEJERO}/ObtenerCallejero'
 
         request = requests.get(uri, params={

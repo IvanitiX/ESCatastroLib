@@ -98,19 +98,19 @@ Catastrales más pequeñas).
 
 **Atributos/Inputs del constructor:**
 
-*  `rc (str|None)`: La referencia catastral de la MetaParcela. Puede ser proporcionada como `None`.
-* `provincia (str|None)`:  El nombre de la provincia donde se encuentra la MetaParcela. Por
+*  `rc (Union[str,None])`: La referencia catastral de la MetaParcela. Puede ser proporcionada como `None`.
+* `provincia (Union[str,None])`:  El nombre de la provincia donde se encuentra la MetaParcela. Por
 defecto, es `None`, lo que permite usar nombres generales.
-* `municipio (str|None)`: El nombre del municipio donde se encuentra la MetaParcela. Por
+* `municipio (Union[str,None])`: El nombre del municipio donde se encuentra la MetaParcela. Por
 defecto, es `None`, lo que permite usar nombres generales.
-* `poligono (int|None)`: El número del polígono en el que se encuentra la MetaParcela. Se utiliza para encontrar
+* `poligono (Union[int,None])`: El número del polígono en el que se encuentra la MetaParcela. Se utiliza para encontrar
 una parcela específica.
-* `parcela (int|None)`: El número de parcelas dentro de la MetaParcela. Se utiliza para encontrar una parcela
+* `parcela (Union[int,None])`: El número de parcelas dentro de la MetaParcela. Se utiliza para encontrar una parcela
 específica.
-* `tipo_via (str|None)`: Tipo de camino en la dirección de la MetaParcela. Se usa para encontrar una parcela
+* `tipo_via (Union[str,None])`: Tipo de camino en la dirección de la MetaParcela. Se usa para encontrar una parcela
 específica.
-* `calle (str|None)`: Nombre de la calle de la MetaParcela. Se usa para encontrar una parcela específica.
-* `numero (str|None)`: Número de casa de la MetaParcela.
+* `calle (Union[str,None])`: Nombre de la calle de la MetaParcela. Se usa para encontrar una parcela específica.
+* `numero (Union[str,None])`: Número de casa de la MetaParcela.
 
 **Atributos:**
 

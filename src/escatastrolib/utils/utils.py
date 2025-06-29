@@ -1,6 +1,8 @@
 import requests
 import json
 
+from typing import Union
+
 from .statics import URL_BASE_CALLEJERO, MAPEOS_PROVINCIAS, TIPOS_VIA, SISTEMAS_REFERENCIA, URL_BASE_COORDENADAS, URL_BASE_CARTOCIUDAD_GEOCODER
 from .exceptions import lanzar_excepcion
 
@@ -38,7 +40,7 @@ def listar_provincias():
     response = requests.get(f'{URL_BASE_CALLEJERO}/ObtenerProvincias')
     return [provincia.get('np') for provincia in response.json().get('consulta_provincieroResult').get('provinciero').get('prov')] if comprobar_errores(response.json()) else []
 
-def listar_municipios(provincia: str, municipio: str|None = None):
+def listar_municipios(provincia: str, municipio: Union[str,None] = None):
 
     """
     Obtiene una lista de municipios de España.
@@ -180,8 +182,8 @@ def geocodificar_direccion(direccion: str, municipio: str = None):
     if response.status_code == 200:
         data = json.loads(response.content.decode('utf-8').replace('callback(', '').replace(')', ''))
         return {
-            'x': data.get('lat'),
-            'y': data.get('lng'),
+            'x': data.get('lng'),
+            'y': data.get('lat'),
             'rc': data.get('refCatastral')
         }
     else:
