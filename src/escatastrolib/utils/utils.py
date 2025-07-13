@@ -6,6 +6,25 @@ from typing import Union
 from .statics import URL_BASE_CALLEJERO, MAPEOS_PROVINCIAS, TIPOS_VIA, SISTEMAS_REFERENCIA, URL_BASE_COORDENADAS, URL_BASE_CARTOCIUDAD_GEOCODER
 from .exceptions import lanzar_excepcion
 
+def comprobar_long_contenido(contenido:str):
+    """
+        Comprueba si el mensaje se puede cargar, es decir, si no esta vacio
+        
+        Args:
+        - contenido: El contenido de la peticion
+        Raises:
+        - lanzar_excepcion: Si el mensaje esta vacio o no se puede formar el JSON.
+    """
+    
+    try:
+        if len(contenido)>0:
+            json.loads(contenido)
+            return True
+        else:
+            raise Exception()
+    except:
+        raise lanzar_excepcion(mensaje_error="Error al cargar JSON")
+
 def comprobar_errores(respuesta: dict):
     """
     Comprueba si la respuesta contiene errores.
@@ -63,7 +82,7 @@ def listar_municipios(provincia: str, municipio: Union[str,None] = None):
                                                     else provincia ,
                                     'municipio': municipio
                                 })
-    if response.status_code == 200 and comprobar_errores(response.json()):
+    if response.status_code == 200 and comprobar_long_contenido(response.content) and comprobar_errores(response.json()):
         mun_dict_raw = json.loads(response.content)
         return [mun.get('nm') for mun in mun_dict_raw.get('consulta_municipieroResult').get('municipiero').get('muni')]
     else:
@@ -96,7 +115,7 @@ def listar_calles(provincia: str, municipio: str):
                                     'Provincia': provincia_final,
                                     'Municipio': municipio
                                 })
-        if response.status_code == 200 and comprobar_errores(response.json()):
+        if response.status_code == 200 and comprobar_long_contenido(response.content) and comprobar_errores(response.json()):
             calles_dict_raw = json.loads(response.content)
             return [f"{calle.get('dir').get('tv')} {calle.get('dir').get('nv')}" for calle in calles_dict_raw.get('consulta_callejeroResult').get('callejero').get('calle')]
         else:
@@ -129,7 +148,7 @@ def convertir_coordenadas_a_rc(lat: float, lon: float, sr: str = 'EPSG:4326'):
                                 'CoorY': lat,
                                 'SRS': sr
                             })
-    if response.status_code == 200 and comprobar_errores(response.json()):
+    if response.status_code == 200 and comprobar_long_contenido(response.content) and comprobar_errores(response.json()):
         return ''.join([part for part in response.json().get('Consulta_RCCOORResult').get('coordenadas').get('coord')[0].get('pc').values()])
     else:
         return None
@@ -152,7 +171,7 @@ def convertir_rc_a_coordenadas(rc: str, sr: str = 'EPSG:4326'):
                                 'RefCat': rc_corregido,
                                 'SRS': sr
                             })
-    if response.status_code == 200 and comprobar_errores(response.json()):
+    if response.status_code == 200 and comprobar_long_contenido(response.content) and comprobar_errores(response.json()):
         coordenadas = response.json().get('Consulta_CPMRCResult').get('coordenadas').get('coord')[0].get('geo')
         return {
             'x': coordenadas.get('xcen'),

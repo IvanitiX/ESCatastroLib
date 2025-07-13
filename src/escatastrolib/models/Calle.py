@@ -1,6 +1,6 @@
 from .Municipio import Municipio
 from ..utils.statics import URL_BASE_CALLEJERO
-from ..utils.utils import comprobar_errores
+from ..utils.utils import comprobar_errores, comprobar_long_contenido
 
 import requests
 import json
@@ -34,7 +34,7 @@ class Calle:
             'TipoVia': tipo_via
         })
 
-        if request.status_code == 200:
+        if request.status_code == 200 and comprobar_long_contenido(request.content):
             calle_dict = json.loads(request.text)
 
             if comprobar_errores(calle_dict) and nombre_calle:

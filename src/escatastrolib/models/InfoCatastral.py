@@ -93,32 +93,35 @@ class ParcelaCatastral:
         req1 = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPRC',
                             params={'RefCat': rc})
         
-        info_cadastre = json.loads(req1.content)
-        if comprobar_errores(info_cadastre):
-            cudnp = info_cadastre.get("consulta_dnprcResult", {}).get("control", {}).get("cudnp", 1)
-        
-            if cudnp > 1:
-                raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
-            else:
-                self.rc = ''.join(info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('rc').values())
-                self.url_croquis = requests.get(URL_BASE_CROQUIS_DATOS, params={'refcat': self.rc}).url
-                self.municipio = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('nm')
-                self.provincia = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('np')
-                self.tipo = 'Rústico' if info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('cn') == 'RU' else 'Urbano'
-                if self.tipo == 'Urbano':
-                    self.calle = f"{info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('tv')} {info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('nv')}"
-                    self.numero = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('pnp')
-                    self.antiguedad = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('debi').get('ant')
-                    self.uso = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('debi').get('luso')
-                elif self.tipo == 'Rústico':
-                    self.parcela = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('cpp').get('cpa')
-                    self.poligono = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('cpp').get('cpo')
-                    self.nombre_paraje = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('npa')
-                
-                self.__create_regions(info_cadastre)
-                self.__create_geometry(projection)
+        if len(req1.content) > 0:
+            info_cadastre = json.loads(req1.content)
+            if comprobar_errores(info_cadastre):
+                cudnp = info_cadastre.get("consulta_dnprcResult", {}).get("control", {}).get("cudnp", 1)
+            
+                if cudnp > 1:
+                    raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
+                else:
+                    self.rc = ''.join(info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('rc').values())
+                    self.url_croquis = requests.get(URL_BASE_CROQUIS_DATOS, params={'refcat': self.rc}).url
+                    self.municipio = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('nm')
+                    self.provincia = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('np')
+                    self.tipo = 'Rústico' if info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('cn') == 'RU' else 'Urbano'
+                    if self.tipo == 'Urbano':
+                        self.calle = f"{info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('tv')} {info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('nv')}"
+                        self.numero = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('pnp')
+                        self.antiguedad = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('debi').get('ant')
+                        self.uso = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('debi').get('luso')
+                    elif self.tipo == 'Rústico':
+                        self.parcela = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('cpp').get('cpa')
+                        self.poligono = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('cpp').get('cpo')
+                        self.nombre_paraje = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('npa')
+                    
+                    self.__create_regions(info_cadastre)
+                    self.__create_geometry(projection)
 
-                self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
+                    self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
+        else:
+            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
 
     def __create_from_parcel(self, provincia: Union[str,None], municipio: Union[str,None], poligono: Union[str,None], parcela: Union[str,None], projection: str):
         """Create an instance of InfoCatastral from a parcela string."""
@@ -129,16 +132,18 @@ class ParcelaCatastral:
                                'Poligono': poligono,
                                'Parcela': parcela
                            })
-        
-        info_cadastre = json.loads(req.content)
-        if comprobar_errores(info_cadastre):
-            cudnp = info_cadastre.get("consulta_dnpppResult", {}).get("control", {}).get("cudnp", 1)
+        if len(req.content) > 0:
+            info_cadastre = json.loads(req.content)
+            if comprobar_errores(info_cadastre):
+                cudnp = info_cadastre.get("consulta_dnpppResult", {}).get("control", {}).get("cudnp", 1)
 
-            if cudnp > 1:
-                raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
-            else:
-                self.rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('bico').get('bi').get('idbi').get('rc').values())
-                self.__create_from_rc(self.rc, projection)
+                if cudnp > 1:
+                    raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
+                else:
+                    self.rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('bico').get('bi').get('idbi').get('rc').values())
+                    self.__create_from_rc(self.rc, projection)
+        else:
+            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
 
     def __create_from_address(self, provincia: Union[str,None], municipio: Union[str,None], tipo_via: Union[str,None], calle: Union[str,None], numero: Union[str,None], projection: str):
         """Create an instance of InfoCatastral from an address string."""
@@ -161,7 +166,7 @@ class ParcelaCatastral:
                                    'Numero': numero
                                })
             
-            if req.status_code == 200 and comprobar_errores(req.json()):
+            if req.status_code == 200 and len(req.content) > 0 and comprobar_errores(req.json()):
                 info_cadastre = json.loads(req.content)
                 cudnp = info_cadastre.get("consulta_dnplocResult", {}).get("control", {}).get("cudnp", 1)
 
@@ -176,6 +181,8 @@ class ParcelaCatastral:
             elif 'lerr' in json.loads(req.content).get('consulta_dnplocResult') and json.loads(req.content)['consulta_dnplocResult']['lerr'][0]['cod'] == '43':
                 info_cadastre = json.loads(req.content)
                 raise Exception(f"Ese número no existe. Prueba con alguno de estos: {[num.get('num').get('pnp') for num in info_cadastre.get('consulta_dnplocResult').get('numerero').get('nump')]}")
+            else:
+                raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
 
                 
         else:
@@ -227,14 +234,17 @@ class MetaParcela:
         """Create an instance of InfoCatastral from a RC (Referencia Catastral) string."""
         req1 = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPRC',
                             params={'RefCat': rc})
-    
-        info_cadastre = json.loads(req1.content)
-        if comprobar_errores(info_cadastre):
-            self.parcelas = []
-            num_parcelas = info_cadastre.get("consulta_dnprcResult", {}).get("control", {}).get("cudnp", 1)
-            for idx in range(num_parcelas):
-                rc = ''.join(info_cadastre.get('consulta_dnprcResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
+
+        if len(req.content) > 0:
+            info_cadastre = json.loads(req1.content)
+            if comprobar_errores(info_cadastre):
+                self.parcelas = []
+                num_parcelas = info_cadastre.get("consulta_dnprcResult", {}).get("control", {}).get("cudnp", 1)
+                for idx in range(num_parcelas):
+                    rc = ''.join(info_cadastre.get('consulta_dnprcResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
                 self.parcelas.append(ParcelaCatastral(rc=rc))
+        else:
+            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
                 
 
     def __create_from_parcel(self, provincia: Union[str,None], municipio: Union[str,None], poligono: Union[str,None], parcela: Union[str,None]):
@@ -246,14 +256,16 @@ class MetaParcela:
                                'Poligono': poligono,
                                'Parcela': parcela
                            })
-        
-        info_cadastre = json.loads(req.content)
-        if comprobar_errores(info_cadastre):
-            self.parcelas = []
-            num_parcelas = info_cadastre.get("consulta_dnpppResult", {}).get("control", {}).get("cudnp", 1)
-            for idx in range(num_parcelas):
-                rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
-                self.parcelas.append(ParcelaCatastral(rc=rc))
+        if len(req.content) > 0:
+            info_cadastre = json.loads(req.content)
+            if comprobar_errores(info_cadastre):
+                self.parcelas = []
+                num_parcelas = info_cadastre.get("consulta_dnpppResult", {}).get("control", {}).get("cudnp", 1)
+                for idx in range(num_parcelas):
+                    rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
+                    self.parcelas.append(ParcelaCatastral(rc=rc))
+        else:
+            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
 
     def __create_from_address(self, provincia: Union[str,None], municipio: Union[str,None], tipo_via: Union[str,None], calle: Union[str,None], numero: Union[str,None]):
         """Create an instance of InfoCatastral from an address string."""
@@ -276,13 +288,15 @@ class MetaParcela:
                                    'Numero': numero
                                })
             
-            if req.status_code == 200 and comprobar_errores(req.json()):
+            if req.status_code == 200 and len(req.content) > 0 and comprobar_errores(req.json()):
                 info_cadastre = json.loads(req.content)
                 self.parcelas = []
                 num_parcelas = info_cadastre.get("consulta_dnplocResult", {}).get("control", {}).get("cudnp", 1)
                 for idx in range(num_parcelas):
                     rc = ''.join(info_cadastre.get('consulta_dnplocResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
                     self.parcelas.append(ParcelaCatastral(rc=rc))
+            else:
+                raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
                 
         else:
             raise Exception('La calle no existe.')
