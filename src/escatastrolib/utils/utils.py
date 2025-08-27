@@ -208,4 +208,6 @@ def geocodificar_direccion(direccion: str, municipio: str = None):
     else:
         return None
             
+def lon_lat_from_coords_dict(coords):
+    return float(coords["x"]), float(coords["y"])
 
