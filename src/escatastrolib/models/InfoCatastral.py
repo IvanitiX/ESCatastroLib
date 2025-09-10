@@ -1,15 +1,13 @@
 import requests
 import json
 import xmltodict
-import geopandas as gpd
-from shapely.geometry import Point, Polygon
-from shapely import to_geojson
 
 from typing import Union
 
 from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS
 from ..utils.utils import comprobar_errores, listar_sistemas_referencia, lon_lat_from_coords_dict
 from ..utils.exceptions import ErrorServidorCatastro
+from ..utils import converters
 from .Calle import Calle, Municipio
 
 class ParcelaCatastral:
@@ -212,6 +210,58 @@ class ParcelaCatastral:
         else:
             raise ValueError("No se ha proporcionado suficiente información para realizar la búsqueda")
         
+
+    def to_dataframe(self):
+        """
+        Convierte la parcela en un DataFrame de pandas.
+
+        Returns:
+            pd.DataFrame: Un DataFrame que contiene los datos de la parcela.
+        """
+        return converters.to_geodataframe([self])
+    
+    def to_json(self, filename: Union[str,None] = None) -> str:
+        """
+        Convierte la parcela en un JSON.
+
+        Args:
+            filename (Union[str,None], optional): Nombre del archivo donde guardar el JSON. Defaults to None.
+
+        Returns:
+            str: Una cadena JSON que contiene los datos de la parcela.
+        """
+        return converters.to_json([self], filename)
+    
+    def to_csv(self, filename: Union[str,None] = None) -> str:
+        """
+        Convierte la parcela en un CSV.
+
+        Args:
+            filename (Union[str,None], optional): Nombre del archivo donde guardar el CSV. Defaults to None.
+
+        Returns:
+            str: Una cadena CSV que contiene los datos de la parcela.
+        """
+        return converters.to_csv([self], filename)
+    
+    def to_shapefile(self, filename: str):
+        """
+        Guarda la parcela como un archivo Shapefile.
+
+        Args:
+            filename (str): El nombre del archivo Shapefile a guardar.
+        """
+        converters.to_shapefile([self], filename)
+
+    def to_parquet(self, filename: str):
+        """
+        Guarda la parcela como un archivo Parquet.
+
+        Args:
+            filename (str): El nombre del archivo Parquet a guardar.
+        """
+        converters.to_parquet([self], filename)
+        
 class MetaParcela:
     """
     Clase que representa una MetaParcela, es decir, una gran parcela catastral con 
@@ -238,7 +288,7 @@ class MetaParcela:
         req1 = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPRC',
                             params={'RefCat': rc})
 
-        if len(req.content) > 0:
+        if len(req1.content) > 0:
             info_cadastre = json.loads(req1.content)
             if comprobar_errores(info_cadastre):
                 self.parcelas = []
@@ -323,49 +373,39 @@ class MetaParcela:
         else:
             raise ValueError("No se ha proporcionado suficiente información para realizar la búsqueda")
         
-    def to_geodataframe(self) -> gpd.GeoDataFrame:
-        """
-        Convierte la MetaParcela en un GeoDataFrame de GeoPandas.
 
-        Args:
-            projection (str): El sistema de referencia espacial (SRS) para el GeoDataFrame. Default es 'EPSG:4326'.
+    def to_dataframe(self):
+        """
+        Convierte la MetaParcela en un DataFrame de pandas.
 
         Returns:
-            gpd.GeoDataFrame: Un GeoDataFrame que contiene las parcelas de la MetaParcela.
+            pd.DataFrame: Un DataFrame que contiene las parcelas de la MetaParcela.
         """
-        return gpd.GeoDataFrame({
-                        "rc": pc.rc,
-                        "tipo": pc.tipo,
-                        "superficie": pc.superficie,
-                        "provincia": pc.provincia, 
-                        "municipio": pc.municipio, 
-                        "regiones": ','.join([f"{reg.get('descripcion')} ({reg.get('superficie')} m^2)" for reg in pc.regiones]) , 
-                        "centroide": Point(lon_lat_from_coords_dict(pc.centroide)),
-                        "geometry": Polygon([lon_lat_from_coords_dict(coord) for coord in pc.geometria]),
-                        "calle": pc.calle if pc.tipo == "Urbano" else '',
-                        "numero": pc.numero if pc.tipo == "Urbano" else '',
-                        "antiguedad": pc.antiguedad if pc.tipo == "Urbano" else '',
-                        "uso": pc.uso if pc.tipo == "Urbano" else '',
-                        "nombre_paraje": pc.nombre_paraje if pc.tipo == "Rústico" else '',
-                        "poligono": pc.poligono if pc.tipo == "Rústico" else '',
-                        "parcela": pc.parcela if pc.tipo == "Rústico" else ''
-                        } for pc in self.parcelas)
+        return converters.to_geodataframe(self.parcelas)
     
     def to_json(self, filename: Union[str,None] = None) -> str:
-        geodataframe = self.to_geodataframe()
-        geodataframe['centroide'] = geodataframe['centroide'].apply(lambda x: to_geojson(x))
-        json_data = geodataframe.to_json().replace("\\",'').replace("\"{", "{").replace("}\"", "}")
+        """
+        Convierte la MetaParcela en un JSON.
 
-        if filename:
-            with open(filename, 'w') as writer:
-                writer.write(json_data)
-                
-        return json_data
+        Args:
+            filename (Union[str,None], optional): Nombre del archivo donde guardar el JSON. Defaults to None.
+
+        Returns:
+            str: Una cadena JSON que contiene las parcelas de la MetaParcela.
+        """
+        return converters.to_json(self.parcelas, filename)
     
     def to_csv(self, filename: Union[str,None] = None) -> str:
-        if filename:
-            self.to_geodataframe().to_csv(filename, index=False)
-        return self.to_geodataframe().to_csv(index=False)
+        """
+        Convierte la MetaParcela en un CSV.
+
+        Args:
+            filename (Union[str,None], optional): Nombre del archivo donde guardar el CSV. Defaults to None.
+
+        Returns:
+            str: Una cadena CSV que contiene las parcelas de la MetaParcela.
+        """
+        return converters.to_csv(self.parcelas, filename)
     
     def to_shapefile(self, filename: str):
         """
@@ -374,7 +414,7 @@ class MetaParcela:
         Args:
             filename (str): El nombre del archivo Shapefile a guardar.
         """
-        self.to_geodataframe().to_file(filename, driver='ESRI Shapefile')
+        converters.to_shapefile(self.parcelas, filename)
 
     def to_parquet(self, filename: str):
         """
@@ -383,5 +423,5 @@ class MetaParcela:
         Args:
             filename (str): El nombre del archivo Parquet a guardar.
         """
-        self.to_geodataframe().to_file(filename, driver='Parquet')
+        converters.to_parquet(self.parcelas, filename)
         

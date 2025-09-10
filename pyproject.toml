@@ -23,6 +23,8 @@ classifiers = [
     "Framework :: Pytest",
 ]
 dependencies = [
+    "geopandas",
+    "shapely",
     "pytest",
     "requests",
     "xmltodict",
