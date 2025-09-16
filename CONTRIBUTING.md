@@ -1,7 +1,7 @@
 <!-- omit in toc -->
 # ¡Contribuye a la librería ESCatastroLib!
 
-Antes de nada, ¡gracias por tomarte el tiempo para contribuir al proyecto! 💙💚
+Antes de nada, ¡gracias por tomarte el tiempo para contribuir al proyecto! 🇪🇸🏞️
 
 > Recordamos que tenemos un [Código de conducta](CODE_OF_CONDUCT.md) que aplicamos aquí
 
@@ -136,11 +136,10 @@ include Setup of env, IDE and typical getting started instructions?
 
 -->
 #### Haciendo funcionar a la librería
-Una vez hayas descargado el código, queda hacer un poco de setup.
-- Instala los requisitos con `pip install -r requirements.txt`
-- Activa el entorno virtual de Rasa con `source venv/bin/activate`
-- Y para probar, conecta un micrófono y ejecuta python boot.py
--  Esto ha sido probado con Ubuntu 20.04. De no funcionar, por favor, añadid una Issue de GitHub.
+Una vez hayas descargado el código, podrás usar Hatch para:
+- Crear el entorno de pruebas (hatch env)
+- Hacer tests (con hatch test o hatch --test-all, que incluye las versiones de la 3.8 a la 3.13)
+- Construir un paquete en local (con hatch build)
 #### Para hacer los cambios
 Los cambios a las clases las podréis hacer en los ficheros de `models`, y las funciones de apoyo, en los de `utils`.
 
@@ -186,3 +185,4 @@ Al ser un proyecto con sólo una persona, toda ayuda que se quiera prestar será
 <!-- omit in toc -->
 ## Atribuciones
 Esta guía está basada en una traducción de **contributing-gen**. [Make your own](https://github.com/bttger/contributing-gen)!
+
