@@ -25,6 +25,7 @@ classifiers = [
 dependencies = [
     "geopandas",
     "shapely",
+    "pyarrow",
     "pytest",
     "requests",
     "xmltodict",

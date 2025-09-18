@@ -21,10 +21,7 @@ def to_geodataframe(parcelas: list) -> gpd.GeoDataFrame:
                     "provincia": pc.provincia, 
                     "municipio": pc.municipio, 
                     "regiones": ','.join([f"{reg.get('descripcion')} ({reg.get('superficie')} m^2)" for reg in pc.regiones]) , 
-                    "geometry": GeometryCollection([
-                        Point(lon_lat_from_coords_dict(pc.centroide)),
-                        Polygon([lon_lat_from_coords_dict(coord) for coord in pc.geometria]),
-                    ]),
+                    "geometry": Polygon([lon_lat_from_coords_dict(coord) for coord in pc.geometria]),
                     "calle": pc.calle if pc.tipo == "Urbano" else '',
                     "numero": pc.numero if pc.tipo == "Urbano" else '',
                     "antiguedad": pc.antiguedad if pc.tipo == "Urbano" else '',
