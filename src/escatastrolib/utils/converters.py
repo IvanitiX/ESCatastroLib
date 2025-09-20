@@ -61,4 +61,5 @@ def to_parquet(parcelas: list,  filename: str):
     Args:
         filename (str): El nombre del archivo Parquet a guardar.
     """
-    to_geodataframe(parcelas).to_file(filename, driver='Parquet')
+
+    to_geodataframe(parcelas).to_parquet(filename)
