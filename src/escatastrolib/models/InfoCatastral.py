@@ -253,6 +253,14 @@ class ParcelaCatastral:
         """
         converters.to_shapefile([self], filename)
 
+    def to_parquet(self, filename: str):
+        """
+        Guarda la parcela como un archivo Parquet.
+
+        Args:
+            filename (str): El nombre del archivo Parquet a guardar.
+        """
+        converters.to_parquet([self], filename)
         
 class MetaParcela:
     """
@@ -407,3 +415,13 @@ class MetaParcela:
             filename (str): El nombre del archivo Shapefile a guardar.
         """
         converters.to_shapefile(self.parcelas, filename)
+
+    def to_parquet(self, filename: str):
+        """
+        Guarda la MetaParcela como un archivo Parquet.
+
+        Args:
+            filename (str): El nombre del archivo Parquet a guardar.
+        """
+        converters.to_parquet(self.parcelas, filename)
+        
