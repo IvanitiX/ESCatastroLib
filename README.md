@@ -173,6 +173,68 @@ Devuelve una lista de calles para una provincia y municipio dados.
 **Devuelve**:
 * `list`: Una lista de calles en formato "tipo de vía nombre de vía".
 
+
+# Conversores
+
+Las clases `ParcelaCatastral` y `MetaParcela` incluyen métodos para exportar los datos en diferentes formatos. Estos métodos permiten convertir los datos de las parcelas en formatos útiles para análisis y almacenamiento.
+
+## Métodos disponibles
+
+### `to_dataframe()`
+
+Convierte la parcela o metaparcela en un DataFrame de GeoPandas, el cual incluye información geográfica.
+
+**Devuelve**:
+* `gpd.GeoDataFrame`: Un DataFrame que contiene los datos de la parcela o metaparcela.
+
+### `to_json()`
+Convierte la parcela o metaparcela en un archivo JSON.
+
+**Argumentos**:
+
+`filename (str, opcional)`: Nombre del archivo donde guardar el JSON. Si no se proporciona, devuelve el JSON como cadena.
+
+**Devuelve**:
+
+`str`: Una cadena JSON que contiene los datos de la parcela o metaparcela, en caso de no añadir `filename`.
+
+Un archivo con el `filename` en caso de añadirlo.
+
+### `to_csv()`
+Convierte la parcela o metaparcela en un archivo CSV.
+
+**Argumentos**:
+
+`filename (str, opcional)`: Nombre del archivo donde guardar el JSON. Si no se proporciona, devuelve el CSV como cadena.
+
+**Devuelve**:
+
+`str`: Una cadena CSV que contiene los datos de la parcela o metaparcela, en caso de no añadir `filename`.
+
+Un archivo con el `filename` en caso de añadirlo.
+
+# `to_shapefile()`
+Guarda la parcela o metaparcela como un archivo Shapefile.
+
+**Argumentos**:
+
+`filename (str)`: El nombre del archivo Shapefile a guardar.
+
+**Devuelve**:
+
+Un archivo con el `filename`.
+
+### `to_parquet()`
+Guarda la parcela o metaparcela como un archivo Parquet.
+
+**Argumentos**:
+
+`filename (str)`: El nombre del archivo Parquet a guardar.
+
+**Devuelve**:
+
+Un archivo con el `filename`.
+
 # Y esta librería... ¿Cómo se usa?
 ¡Buena pregunta! Os dejo algunos ejemplos:
 
@@ -244,6 +306,21 @@ pc = ParcelaCatastral(provincia='Granada', municipio='Guadix', tipo_via='PZ', ca
 
 mp = MetaParcela(provincia='Granada', municipio='Guadix', tipo_via='CL', calle='Largacha', numero=6)
 # [OK] {'provincia': 'Granada', 'municipio': 'Guadix', 'calle': 'Largacha', 'numero': 6, 'parcelas': [<ESCatastroLib.models.InfoCatastral.ParcelaCatastral object at 0x7ff4441944c0>, <ESCatastroLib.models.InfoCatastral.ParcelaCatastral object at 0x7ff44507e770>, <ESCatastroLib.models.InfoCatastral.ParcelaCatastral object at 0x7ff444194160>, <ESCatastroLib.models.InfoCatastral.ParcelaCatastral object at 0x7ff44507e110>]}
+
+# Convertir a DataFrame
+df = pc.to_dataframe()
+
+# Exportar a JSON
+pc.to_json("parcela.json")
+
+# Exportar a CSV
+pc.to_csv("parcela.csv")
+
+# Exportar a Shapefile
+pc.to_shapefile("parcela.shp")
+
+# Exportar a Parquet
+pc.to_parquet("parcela.parquet")
 
 ```
 
