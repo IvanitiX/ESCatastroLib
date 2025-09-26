@@ -200,11 +200,22 @@ def geocodificar_direccion(direccion: str, municipio: str = None):
     
     if response.status_code == 200:
         data = json.loads(response.content.decode('utf-8').replace('callback(', '').replace(')', ''))
-        return {
-            'x': data.get('lng'),
-            'y': data.get('lat'),
-            'rc': data.get('refCatastral')
-        }
+        print(data)
+        if type(data) == dict:
+           return {
+                'x': data.get('lng'),
+                'y': data.get('lat'),
+                'rc': data.get('refCatastral')
+            }
+        elif type(data) == list and len(data) > 0:
+            pc = data[0]
+            return {
+                'x': pc.get('lng'),
+                'y': pc.get('lat'),
+                'rc': pc.get('refCatastral')
+            }
+        else:
+            return None
     else:
         return None
             
