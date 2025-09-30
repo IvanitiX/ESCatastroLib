@@ -239,8 +239,8 @@ Un archivo con el `filename`.
 ¡Buena pregunta! Os dejo algunos ejemplos:
 
 ```python
-from escatastrolib import Municipio, Calle, ParcelaCatastral, MetaParcela
-from escatastrolib.utils import listar_provincias, listar_tipos_via, listar_calles, listar_municipios
+from ESCatastroLib import Municipio, Calle, ParcelaCatastral, MetaParcela
+from ESCatastroLib.utils import listar_provincias, listar_tipos_via, listar_calles, listar_municipios
 
 print(listar_provincias())
 # > ['A CORUÑA', 'ALACANT', 'ALBACETE', 'ALMERIA', 'ASTURIAS', 'AVILA', 'BADAJOZ', ...]
