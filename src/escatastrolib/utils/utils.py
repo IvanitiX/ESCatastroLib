@@ -1,7 +1,7 @@
 import requests
 import json
 
-from geopy.distance import distance
+from geopy.distance import geodesic
 
 from typing import Union, List
 
@@ -225,5 +225,5 @@ def lon_lat_from_coords_dict(coords):
     return float(coords["x"]), float(coords["y"])
 
 def distancia_entre_dos_puntos_geograficos(origen: List[float], destino: List[float]):
-    return distance(origen,destino).m
+    return geodesic(origen,destino).m
     
