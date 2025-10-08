@@ -95,7 +95,10 @@ class ParcelaCatastral:
                             params={'RefCat': rc})
         
         if len(req1.content) > 0:
-            info_cadastre = json.loads(req1.content)
+            try:
+                info_cadastre = json.loads(req1.content)
+            except:
+                raise ErrorServidorCatastro(mensaje=f"El servidor no devuelve un JSON. Mensaje en bruto: {req1.content}")
             if comprobar_errores(info_cadastre):
                 cudnp = info_cadastre.get("consulta_dnprcResult", {}).get("control", {}).get("cudnp", 1)
             
@@ -134,7 +137,10 @@ class ParcelaCatastral:
                                'Parcela': parcela
                            })
         if len(req.content) > 0:
-            info_cadastre = json.loads(req.content)
+            try:
+                info_cadastre = json.loads(req.content)
+            except:
+                raise ErrorServidorCatastro(mensaje=f"El servidor no devuelve un JSON. Mensaje en bruto: {req1.content}")
             if comprobar_errores(info_cadastre):
                 cudnp = info_cadastre.get("consulta_dnpppResult", {}).get("control", {}).get("cudnp", 1)
 
@@ -168,7 +174,10 @@ class ParcelaCatastral:
                                })
             
             if req.status_code == 200 and len(req.content) > 0 and comprobar_errores(req.json()):
-                info_cadastre = json.loads(req.content)
+                try:
+                    info_cadastre = json.loads(req1.content)
+                except:
+                    raise ErrorServidorCatastro(mensaje=f"El servidor no devuelve un JSON. Mensaje en bruto: {req1.content}")
                 cudnp = info_cadastre.get("consulta_dnplocResult", {}).get("control", {}).get("cudnp", 1)
 
                 if cudnp > 1:
