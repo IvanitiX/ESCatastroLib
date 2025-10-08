@@ -1,7 +1,9 @@
 import requests
 import json
 
-from typing import Union
+from geopy.distance import distance
+
+from typing import Union, List
 
 from .statics import URL_BASE_CALLEJERO, MAPEOS_PROVINCIAS, TIPOS_VIA, SISTEMAS_REFERENCIA, URL_BASE_COORDENADAS, URL_BASE_CARTOCIUDAD_GEOCODER
 from .exceptions import lanzar_excepcion
@@ -222,3 +224,6 @@ def geocodificar_direccion(direccion: str, municipio: str = None):
 def lon_lat_from_coords_dict(coords):
     return float(coords["x"]), float(coords["y"])
 
+def distancia_entre_dos_puntos_geograficos(origen: List[float], destino: List[float]):
+    return distance(origen,destino).m
+    

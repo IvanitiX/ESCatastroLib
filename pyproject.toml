@@ -19,8 +19,7 @@ classifiers = [
     "Topic :: Software Development :: Build Tools",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
-    "Natural Language :: Spanish",
-    "Framework :: Pytest",
+    "Natural Language :: Spanish"
 ]
 dependencies = [
     "geopandas",
@@ -29,7 +28,8 @@ dependencies = [
     "pytest",
     "requests",
     "xmltodict",
-    "folium"
+    "folium",
+    "geopy"
 ]
 
 
@@ -69,3 +69,4 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
