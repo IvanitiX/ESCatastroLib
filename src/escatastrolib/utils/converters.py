@@ -17,7 +17,8 @@ def to_geodataframe(parcelas: list) -> gpd.GeoDataFrame:
     return gpd.GeoDataFrame({
                     "rc": pc.rc,
                     "tipo": pc.tipo,
-                    "superficie": pc.superficie,
+                    "superficie_total": pc.superficie_total,
+                    "superficie_construida": pc.superficie_construida,
                     "provincia": pc.provincia, 
                     "municipio": pc.municipio, 
                     "regiones": ','.join([f"{reg.get('descripcion')} ({reg.get('superficie')} m^2)" for reg in pc.regiones]) , 

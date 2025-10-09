@@ -88,6 +88,7 @@ class ParcelaCatastral:
                 'y': parcel_geometry[2*idx]
             } for idx in range(len(parcel_geometry)//2)
         ]
+        self.superficie_total = float(geometry.get('FeatureCollection').get('member').get('cp:CadastralParcel').get('cp:areaValue')) 
 
     def __create_from_rc(self, rc: str, projection: str):
         """Create an instance of InfoCatastral from a RC (Referencia Catastral) string."""
@@ -123,7 +124,7 @@ class ParcelaCatastral:
                     self.__create_regions(info_cadastre)
                     self.__create_geometry(projection)
 
-                    self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
+                    self.superficie_construida = sum(float(region.get('superficie')) for region in self.regiones)
         else:
             raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
 
