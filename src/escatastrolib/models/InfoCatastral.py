@@ -88,7 +88,7 @@ class ParcelaCatastral:
                 'y': parcel_geometry[2*idx]
             } for idx in range(len(parcel_geometry)//2)
         ]
-        self.superficie_total = float(geometry.get('FeatureCollection').get('member').get('cp:CadastralParcel').get('cp:areaValue')) 
+        self.superficie_total = float(geometry.get('FeatureCollection').get('member').get('cp:CadastralParcel').get('cp:areaValue').get('#text')) 
 
     def __create_from_rc(self, rc: str, projection: str):
         """Create an instance of InfoCatastral from a RC (Referencia Catastral) string."""
