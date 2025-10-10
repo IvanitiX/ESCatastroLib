@@ -228,7 +228,7 @@ class ParcelaCatastral:
         if self.geometria:
             distancias = []
             for idx in range(0, len(self.geometria)):
-                idx_0 = len(self.geometria) if idx == 0 else idx-1
+                idx_0 = len(self.geometria)-1 if idx == 0 else idx-1
                 idx_f=idx
                 distancias.append(distancia_entre_dos_puntos_geograficos(
                     lat_lon_from_coords_dict(self.geometria[idx_0]),
