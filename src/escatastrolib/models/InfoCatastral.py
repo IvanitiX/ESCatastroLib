@@ -5,7 +5,7 @@ import xmltodict
 from typing import Union
 
 from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS
-from ..utils.utils import comprobar_errores, listar_sistemas_referencia, lon_lat_from_coords_dict
+from ..utils.utils import comprobar_errores, listar_sistemas_referencia, lon_lat_from_coords_dict, lat_lon_from_coords_dict, distancia_entre_dos_puntos_geograficos 
 from ..utils.exceptions import ErrorServidorCatastro
 from ..utils import converters
 from .Calle import Calle, Municipio
@@ -220,6 +220,32 @@ class ParcelaCatastral:
         else:
             raise ValueError("No se ha proporcionado suficiente información para realizar la búsqueda")
         
+    @property
+    def distancias_aristas(self):
+        """
+            Calcula las distancias entre dos puntos de la geometría, par a par.
+        """
+        if self.geometria:
+            distancias = []
+            for idx in range(0, len(self.geometria)):
+                idx_0 = len(self.geometria) if idx == 0 else idx-1
+                idx_f=idx
+                distancias.append(distancia_entre_dos_puntos_geograficos(
+                    lat_lon_from_coords(self.geometria[idx_0]),
+                    lat_lon_from_coords(self.geometria[idx_f])
+                ))
+            return distancias
+        else: return []
+
+    @property
+    def perimetro(self):
+        """
+            Calcula el perímetro de la geometría
+        """
+
+        if len(self.distancias_aristas) > 0:
+            return sum(self.distancias_aristas)
+        else: return 0
 
     def to_dataframe(self):
         """

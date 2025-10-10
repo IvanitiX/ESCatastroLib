@@ -224,6 +224,13 @@ def geocodificar_direccion(direccion: str, municipio: str = None):
 def lon_lat_from_coords_dict(coords):
     return float(coords["x"]), float(coords["y"])
 
+def lat_lon_from_coords_dict(coords):
+    return float(coords['y']), float(coords['x'])
+
 def distancia_entre_dos_puntos_geograficos(origen: List[float], destino: List[float]):
+    """
+        Devuelve la distancia en metros entre dos puntos geográficos usando latitud y longitud.
+        ¡OJO! Las tuplas deben ser latitud y longitud y no al revés.
+    """
     return geodesic(origen,destino).m
     
