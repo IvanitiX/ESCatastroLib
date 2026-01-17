@@ -1,10 +1,12 @@
 import requests
 import json
 import xmltodict
+from datetime import datetime
 
+from shapely import Point
 from typing import Union
 
-from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS
+from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS, URL_BASE_MAPA_VALORES
 from ..utils.utils import comprobar_errores, listar_sistemas_referencia, lon_lat_from_coords_dict, lat_lon_from_coords_dict, distancia_entre_dos_puntos_geograficos 
 from ..utils.exceptions import ErrorServidorCatastro
 from ..utils import converters
@@ -125,6 +127,8 @@ class ParcelaCatastral:
                     self.__create_geometry(projection)
 
                     self.superficie_construida = sum(float(region.get('superficie')) for region in self.regiones)
+                    self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
+                    self.valor_catastral_m2 = self.calculo_valor_catastral_m2(datetime.now().year)
         else:
             raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
 
@@ -246,6 +250,23 @@ class ParcelaCatastral:
         if len(self.distancias_aristas) > 0:
             return sum(self.distancias_aristas)
         else: return 0
+    def calculo_valor_catastral_m2(self, anio):
+        req = requests.get(f'{URL_BASE_MAPA_VALORES}',
+                               params={
+                                   "huso":"4326",
+                                   "x":self.centroide['x'],
+                                   "y":self.centroide['y'],
+                                   "anyoZV":anio,
+                                   "suelo": "N",
+                                   "tipo_mapa":"vivienda"
+                               })
+
+        values_map = converters.gpd.read_file(req.content)
+        centroide_point = Point(self.centroide['x'],self.centroide['y'])
+        selected_polygon = values_map[values_map.geometry.covers(centroide_point)]
+
+        return json.loads(selected_polygon['Ptipo1'].iloc[0]).get('val_tipo_m2')
+        
 
     def to_dataframe(self):
         """

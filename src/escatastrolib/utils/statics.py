@@ -3,6 +3,7 @@ URL_BASE_COORDENADAS = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/C
 URL_BASE_GEOGRAFIA = 'http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx'
 URL_BASE_CROQUIS_DATOS = f'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx'
 URL_BASE_CARTOCIUDAD_GEOCODER = 'https://www.cartociudad.es/geocoder/api/geocoder'
+URL_BASE_MAPA_VALORES = "https://www1.sedecatastro.gob.es/Cartografia/SECDameGeoJSON.aspx"
 
 MAPEOS_PROVINCIAS = {
     'La Coruña': 'A Coruña',
