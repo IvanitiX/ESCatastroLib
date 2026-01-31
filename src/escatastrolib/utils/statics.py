@@ -1,9 +1,11 @@
 URL_BASE_CALLEJERO = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json'
 URL_BASE_COORDENADAS = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCoordenadas.svc/json'
 URL_BASE_GEOGRAFIA = 'http://ovc.catastro.meh.es/INSPIRE/wfsCP.aspx'
+URL_BASE_WFS_EDIFICIOS = "https://ovc.catastro.meh.es/INSPIRE/wfsBU.aspx"
 URL_BASE_CROQUIS_DATOS = f'https://www1.sedecatastro.gob.es/CYCBienInmueble/SECImprimirCroquisYDatos.aspx'
 URL_BASE_CARTOCIUDAD_GEOCODER = 'https://www.cartociudad.es/geocoder/api/geocoder'
-URL_BASE_MAPA_VALORES = "https://www1.sedecatastro.gob.es/Cartografia/SECDameGeoJSON.aspx"
+URL_BASE_MAPA_VALORES_URBANOS = "https://www1.sedecatastro.gob.es/Cartografia/SECDameGeoJSON.aspx"
+URL_BASE_MAPA_VALORES_RUSTICOS = "https://www1.sedecatastro.gob.es/Cartografia/GeoServerWMS.aspx"
 
 MAPEOS_PROVINCIAS = {
     'La Coruña': 'A Coruña',
@@ -140,3 +142,31 @@ SISTEMAS_REFERENCIA = {
     'EPSG:23030': 'UTM huso 30N en ED50',
     'EPSG:23031': 'UTM huso 31N en ED50'
 }
+
+CULTIVOS = {
+        "ARZ": "Arrozal",
+        "CBP": "Cultivos bajo plástico",
+        "CIT": "Cítricos",
+        "FCR": "Frutal carnoso regadío",
+        "FCS": "Frutal carnoso secano",
+        "FSR": "Frutos secos regadío",
+        "FSS": "Frutos secos secano",
+        "HUE": "Huerta",
+        "OLR": "Olivar regadío",
+        "OLS": "Olivar secano",
+        "PLT": "Plátanos",
+        "SBT": "Cultivos tropicales y subtropicales",
+        "TAR": "Tierras arables regadío",
+        "TAS": "Tierras arables secano",
+        "VIP": "Viñedo parral",
+        "VIR": "Viñedo regadío",
+        "VIS": "Viñedo secano",
+        "VOL": "Viña olivar",
+        "PAR": "Pasto con arbolado",
+        "PRD": "Prados",
+        "PST": "Pastizal",
+        "CON": "Coníferas",
+        "FRL": "Frondosas de crecimiento lento",
+        "FRR": "Frondosas de crecimiento rápido",
+        "MTR": "Matorral"
+    }

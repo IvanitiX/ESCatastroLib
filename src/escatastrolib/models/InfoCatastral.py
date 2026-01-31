@@ -5,8 +5,9 @@ from datetime import datetime
 
 from shapely import Point
 from typing import Union
+from pyproj import Transformer
 
-from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS, URL_BASE_MAPA_VALORES
+from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS, URL_BASE_MAPA_VALORES_URBANOS, URL_BASE_MAPA_VALORES_RUSTICOS, URL_BASE_WFS_EDIFICIOS, CULTIVOS
 from ..utils.utils import comprobar_errores, listar_sistemas_referencia, lon_lat_from_coords_dict, lat_lon_from_coords_dict, distancia_entre_dos_puntos_geograficos 
 from ..utils.exceptions import ErrorServidorCatastro
 from ..utils import converters
@@ -128,7 +129,6 @@ class ParcelaCatastral:
 
                     self.superficie_construida = sum(float(region.get('superficie')) for region in self.regiones)
                     self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
-                    self.valor_catastral_m2 = self.calculo_valor_catastral_m2(datetime.now().year)
         else:
             raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
 
@@ -239,19 +239,25 @@ class ParcelaCatastral:
                     lat_lon_from_coords_dict(self.geometria[idx_f])
                 ))
             return distancias
-        else: return []
+        else: 
+            return None
 
     @property
     def perimetro(self):
         """
             Calcula el perímetro de la geometría
         """
+        distancias = self.distancias_aristas
+        if distancias:
+            return sum(distancias)
+        else: 
+            return None
 
-        if len(self.distancias_aristas) > 0:
-            return sum(self.distancias_aristas)
-        else: return 0
-    def calculo_valor_catastral_m2(self, anio):
-        req = requests.get(f'{URL_BASE_MAPA_VALORES}',
+    def valor_catastral_urbano_m2(self, anio):
+        if self.tipo == 'Rústico':
+            return 0
+        
+        req = requests.get(f'{URL_BASE_MAPA_VALORES_URBANOS}',
                                params={
                                    "huso":"4326",
                                    "x":self.centroide['x'],
@@ -265,7 +271,170 @@ class ParcelaCatastral:
         centroide_point = Point(self.centroide['x'],self.centroide['y'])
         selected_polygon = values_map[values_map.geometry.covers(centroide_point)]
 
-        return json.loads(selected_polygon['Ptipo1'].iloc[0]).get('val_tipo_m2')
+        return selected_polygon['Ptipo1'].iloc[0].get('val_tipo_m2')
+    
+    @property
+    def numero_plantas(self):
+        """
+        Obtiene el número de plantas de un edificio a partir de su
+        referencia catastral usando el WFS INSPIRE de Catastro.
+
+        Criterio:
+        - Se consultan las BuildingPart
+        - Se toma el máximo número de plantas sobre rasante
+        - Se devuelve también el máximo bajo rasante
+
+        Parameters
+        ----------
+        refcat : str
+            Referencia catastral completa (ej: '9795702WG1499N0001AY')
+        timeout : int
+            Timeout de la petición HTTP en segundos
+
+        Returns
+        -------
+        dict
+            {
+                'refcat': str,
+                'parts': int,
+                'max_above_ground': int | None,
+                'max_below_ground': int,
+                'total_floors': int | None,
+                'parts_detail': list
+            }
+        """
+
+        if self.tipo == 'Rústico':
+            return 0
+
+        params = {
+            "service": "WFS",
+            "version": "2.0.0",
+            "request": "GetFeature",
+            "STOREDQUERIE_ID": "GetBuildingPartByParcel",
+            "REFCAT": self.rc,
+            "srsname": "EPSG:4326"
+        }
+
+        response = requests.get(URL_BASE_WFS_EDIFICIOS, params=params)
+        response.raise_for_status()
+
+        data = xmltodict.parse(response.content)
+
+        feature_collection = data.get("gml:FeatureCollection", {})
+        members = feature_collection.get("gml:featureMember", [])
+
+        if isinstance(members, dict):
+            members = [members]
+
+        above_floors = []
+        below_floors = []
+        parts_detail = []
+
+        for member in members:
+            bp = member.get("bu-ext2d:BuildingPart")
+            if not bp:
+                continue
+
+            part_id = bp.get("@gml:id")
+
+            above = bp.get("bu-ext2d:numberOfFloorsAboveGround")
+            below = bp.get("bu-ext2d:numberOfFloorsBelowGround")
+
+            above_i = int(above) if above is not None else None
+            below_i = int(below) if below is not None else 0
+
+            if above_i is not None:
+                above_floors.append(above_i)
+            below_floors.append(below_i)
+
+            parts_detail.append({
+                "id": part_id,
+                "floors_above_ground": above_i,
+                "floors_below_ground": below_i
+            })
+
+        return {
+            "plantas": max(above_floors) if above_floors else None,
+            "sotanos": max(below_floors) if below_floors else 0,
+            "total": (
+                max(above_floors) + max(below_floors)
+                if above_floors else None
+            )
+        }
+    
+    def valor_catastral_rustico_m2(self, anio:str):
+        """
+        Obtiene los valores catastrales de tierras a partir de una referencia catastral.
+
+        Args:
+            referencia_catastral (str): Referencia catastral de la parcela.
+
+        Returns:
+            dict: Datos de la parcela con región y módulos €/ha, o None si no se encuentran.
+        """
+
+        if self.tipo == "Urbano":
+            return {}
+
+        geometria = self.geometria
+
+        # Transformar geometría EPSG:4381 → EPSG:3857
+        transformer = Transformer.from_crs("EPSG:4381", "EPSG:3857", always_xy=True)
+        xs_3857 = []
+        ys_3857 = []
+        for p in geometria:
+            x, y = transformer.transform(p["x"], p["y"])
+            xs_3857.append(x)
+            ys_3857.append(y)
+
+        # BBOX EPSG:3857
+        bbox = f"{min(xs_3857)},{min(ys_3857)},{max(xs_3857)},{max(ys_3857)}"
+
+        params = {
+            "SERVICE": "WMS",
+            "VERSION": "1.3.0",
+            "REQUEST": "GetFeatureInfo",
+            "LAYERS": f"IAMIR{int(str(anio)[-2:])-1}:athiamir{int(str(anio)[-2:])-1}",
+            "QUERY_LAYERS": f"IAMIR{int(str(anio)[-2:])-1}:athiamir{int(str(anio)[-2:])-1}",
+            "STYLES": "",
+            "CRS": "EPSG:3857",
+            "SRS": "EPSG:3857",
+            "BBOX": bbox,
+            "WIDTH": 101,
+            "HEIGHT": 101,
+            "FORMAT": "image/png",
+            "TRANSPARENT": "true",
+            "I": 55,
+            "J": 55,
+            "INFO_FORMAT": "application/json"
+        }
+
+        r = requests.get(URL_BASE_MAPA_VALORES_RUSTICOS, params=params, timeout=15)
+        r.raise_for_status()
+        data = r.json()
+
+        if not data.get("features"):
+            return None
+
+        props = data["features"][0]["properties"]
+
+        modulos = {
+            "region": props.get("REGIONAL"),
+            "nombre_region": props.get("NOMBRE"),
+            "modulos_€/ha": {}
+        }
+
+        for cod, desc in CULTIVOS.items():
+            val = props.get(cod)
+            if isinstance(val, (int, float)) and val > 0:
+                modulos["modulos_€/ha"][desc] = val
+
+        return {
+            "region": modulos["region"],
+            "nombre_region": modulos["nombre_region"],
+            "modulos_€/ha": modulos["modulos_€/ha"]
+        }
         
 
     def to_dataframe(self):
