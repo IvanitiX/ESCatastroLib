@@ -88,6 +88,34 @@ referencia a una MetaParcela.
 * `regiones (list)`: Una lista de regiones en la parcela con una descripción y superficie.
 * `centroide (dict)`:  Las coordenadas del centroide de la parcela. (Latitud y longitud)
 * `geometria (list)`:  Una lista de puntos que representan la geometría de la parcela. (Latitud y longitud)
+* `superficie_total (float)`:  La superficie total de la parcela en metros cuadrados.
+* `superficie_construida (float)`:  La superficie construida en metros cuadrados.
+* `superficie (float)`:  La superficie total de las regiones en metros cuadrados.
+
+**Métodos:**
+
+* `distancias_aristas` (property): Calcula las distancias entre puntos consecutivos de la geometría de la parcela.
+  * Returns: `Optional[List[float]]` - Lista de distancias entre aristas consecutivas en metros, o None si no hay geometría.
+
+* `perimetro` (property): Calcula el perímetro total de la geometría de la parcela.
+  * Returns: `Optional[float]` - Perímetro total en metros, o None si no hay geometría.
+
+* `valor_catastral_urbano_m2(anio: int) -> Optional[float]`: Obtiene el valor catastral por metro cuadrado para parcelas urbanas.
+  * Args: `anio` (int) - Año del valor catastral a consultar.
+  * Returns: Valor catastral en €/m², 0 si es rústica, o None si hay algún error.
+
+* `valor_catastral_rustico_m2(anio: str) -> Optional[Dict]`: Obtiene los valores catastrales de tierras para parcelas rústicas.
+  * Args: `anio` (str) - Año del valor catastral a consultar.
+  * Returns: Diccionario con `region`, `nombre_region` y `modulos_€/ha`, o None si no se encuentran.
+
+* `numero_plantas` (property): Obtiene el número de plantas de un edificio.
+  * Returns: `Dict[str, Any]` con claves `plantas`, `sotanos` y `total`.
+
+* `to_dataframe()`: Convierte la parcela en un GeoDataFrame de GeoPandas.
+* `to_json(filename: Optional[str] = None) -> str`: Convierte la parcela a JSON.
+* `to_csv(filename: Optional[str] = None) -> str`: Convierte la parcela a CSV.
+* `to_shapefile(filename: str)`: Guarda la parcela como Shapefile.
+* `to_parquet(filename: str)`: Guarda la parcela como Parquet.
 
 
 ## Clase MetaParcela
