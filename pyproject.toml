@@ -21,15 +21,25 @@ classifiers = [
     "Operating System :: OS Independent",
     "Natural Language :: Spanish"
 ]
+
 dependencies = [
-    "geopandas",
-    "shapely",
-    "pyarrow",
-    "pytest",
-    "requests",
-    "xmltodict",
-    "folium",
-    "geopy"
+  # comunes (siempre)
+  "requests",
+  "xmltodict",
+  "folium",
+  "geopy",
+
+  # --- shapely ---
+  "shapely<2; python_version<'3.9'",
+  "shapely>=2; python_version>='3.9'",
+
+  # --- geopandas ---
+  "geopandas<0.14; python_version<'3.9'",
+  "geopandas>=0.14; python_version>='3.9'",
+
+  # --- pyarrow ---
+  "pyarrow<14; python_version<'3.9'",
+  "pyarrow>=14; python_version>='3.9'",
 ]
 
 
@@ -45,11 +55,17 @@ path = "src/escatastrolib/__about__.py"
 extra-dependencies = [
   "mypy>=1.0.0",
 ]
+
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/escatastrolib tests}"
 
-[[tool.hatch.envs.test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+[tool.hatch.envs.hatch-test]
+dependencies = [
+  "pytest",
+]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.coverage.run]
 source_pkgs = ["escatastrolib", "tests"]

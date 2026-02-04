@@ -3,8 +3,8 @@ import json
 import xmltodict
 from datetime import datetime
 
-from shapely import Point
-from typing import Union
+from shapely.geometry import Point
+from typing import Union, Dict, Any, Optional, List
 from pyproj import Transformer
 
 from ..utils.statics import URL_BASE_CALLEJERO, URL_BASE_GEOGRAFIA, URL_BASE_CROQUIS_DATOS, URL_BASE_MAPA_VALORES_URBANOS, URL_BASE_MAPA_VALORES_RUSTICOS, URL_BASE_WFS_EDIFICIOS, CULTIVOS
@@ -13,7 +13,98 @@ from ..utils.exceptions import ErrorServidorCatastro
 from ..utils import converters
 from .Calle import Calle, Municipio
 
-class ParcelaCatastral:
+
+class ParcelaHelper:
+    """Clase base con métodos compartidos para operaciones de parcelas catastrales."""
+    
+    def _llamar_a_api(self, url: str, params: Dict[str, Any], timeout: int = 30) -> requests.Response:
+        """Realiza una petición HTTP a la API del Catastro.
+        
+        Args:
+            url: URL del endpoint a consultar
+            params: Parámetros de la petición HTTP
+            timeout: Tiempo máximo de espera en segundos
+            
+        Returns:
+            Objeto Response con la respuesta del servidor
+            
+        Raises:
+            ErrorServidorCatastro: Si el servidor devuelve una respuesta vacía o error
+        """
+        response = requests.get(url, params=params, timeout=timeout)
+        
+        if len(response.content) == 0:
+            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacía")
+            
+        return response
+    
+    def _parsear_respuesta(self, response: requests.Response) -> Dict[str, Any]:
+        """Parsea la respuesta JSON de la API del Catastro.
+        
+        Args:
+            response: Objeto Response de la petición HTTP
+            
+        Returns:
+            Diccionario con los datos parseados
+            
+        Raises:
+            ErrorServidorCatastro: Si el servidor no devuelve un JSON válido
+        """
+        try:
+            return response.json()
+        except json.JSONDecodeError:
+            raise ErrorServidorCatastro(
+                mensaje=f"El servidor no devuelve un JSON. Mensaje en bruto: {response.content}"
+            )
+    
+    def _parametrizar_peticion(self, **kwargs) -> Dict[str, Any]:
+        """Construye un diccionario de parámetros para la petición HTTP.
+        
+        Args:
+            **kwargs: Parámetros clave-valor para la petición
+            
+        Returns:
+            Diccionario con los parámetros filtrados (solo valores no nulos)
+        """
+        return {k: v for k, v in kwargs.items() if v is not None}
+    
+    def _comprobar_errores_catastro(self, info_cadastre: Dict[str, Any]) -> bool:
+        """Verifica si la respuesta del Catastro contiene errores.
+        
+        Args:
+            info_cadastre: Diccionario con la respuesta del Catastro
+            
+        Returns:
+            True si no hay errores, False si hay errores
+        """
+        return comprobar_errores(info_cadastre)
+    
+    def _obtener_numero_parcelas(self, info_cadastre: Dict[str, Any], consulta_key: str) -> int:
+        """Obtiene el número de parcelas de una respuesta del Catastro.
+        
+        Args:
+            info_cadastre: Diccionario con la respuesta del Catastro
+            consulta_key: Clave de la consulta ('dnprc', 'dnppp', 'dnploc')
+            
+        Returns:
+            Número de parcelas encontradas
+        """
+        result_key = f"consulta_{consulta_key}Result"
+        return info_cadastre.get(result_key, {}).get("control", {}).get("cudnp", 1)
+    
+    def _extraer_rc_from_dict(self, rc_dict: Dict[str, Any]) -> str:
+        """Extrae la referencia catastral de un diccionario.
+        
+        Args:
+            rc_dict: Diccionario que contiene la referencia catastral
+            
+        Returns:
+            Referencia catastral como string
+        """
+        return ''.join(rc_dict.values())
+
+
+class ParcelaCatastral(ParcelaHelper):
     """
     Clase que representa una parcela catastral.
     Args:
@@ -48,7 +139,15 @@ class ParcelaCatastral:
         geometria (list): Una lista de puntos que representan la geometría de la parcela.
     """
 
-    def __create_regions(self, info_cadastre: dict):
+    def __create_regions(self, info_cadastre: Dict[str, Any]) -> None:
+        """Crea la lista de regiones de la parcela a partir de los datos del Catastro.
+        
+        Args:
+            info_cadastre: Diccionario con la respuesta del Catastro.
+            
+        Attributes:
+            regiones: Lista de diccionarios con 'descripcion' y 'superficie' de cada región.
+        """
         self.regiones = []
         if self.tipo == 'Urbano':
             iterator = list(info_cadastre.values())[0].get('bico').get('lcons')
@@ -67,18 +166,26 @@ class ParcelaCatastral:
                     })
 
 
-    def __create_geometry(self, projection: str = 'EPSG:4326'):
-        geometry_request = requests.get(f'{URL_BASE_GEOGRAFIA}',
-                                        params={
-                                            'service':'wfs',
-                                            'version':'2',
-                                            'request':'getfeature',
-                                            'STOREDQUERIE_ID':'GetParcel',
-                                            'refcat': self.rc,
-                                            'srsname': projection
-                                        })
-
-        geometry = xmltodict.parse(geometry_request.content)
+    def __create_geometry(self, projection: str = 'EPSG:4326') -> None:
+        """Crea la geometría de la parcela consultando el servicio WFS.
+        
+        Args:
+            projection: Sistema de referencia espacial (EPSG). Por defecto 'EPSG:4326'.
+            
+        Raises:
+            ErrorServidorCatastro: Si el servidor devuelve una respuesta vacía o error.
+        """
+        params = self._parametrizar_peticion(
+            service='wfs',
+            version='2',
+            request='getfeature',
+            STOREDQUERIE_ID='GetParcel',
+            refcat=self.rc,
+            srsname=projection
+        )
+        response = self._llamar_a_api(f'{URL_BASE_GEOGRAFIA}', params)
+        
+        geometry = xmltodict.parse(response.content)
         geoposition = geometry.get('FeatureCollection').get('member').get('cp:CadastralParcel').get('cp:referencePoint').get('gml:Point').get('gml:pos').split(' ')
         self.centroide = {
             'x': geoposition[1],
@@ -95,67 +202,56 @@ class ParcelaCatastral:
 
     def __create_from_rc(self, rc: str, projection: str):
         """Create an instance of InfoCatastral from a RC (Referencia Catastral) string."""
-        req1 = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPRC',
-                            params={'RefCat': rc})
+        params = self._parametrizar_peticion(RefCat=rc)
+        response = self._llamar_a_api(f'{URL_BASE_CALLEJERO}/Consulta_DNPRC', params)
+        info_cadastre = self._parsear_respuesta(response)
         
-        if len(req1.content) > 0:
-            try:
-                info_cadastre = json.loads(req1.content)
-            except:
-                raise ErrorServidorCatastro(mensaje=f"El servidor no devuelve un JSON. Mensaje en bruto: {req1.content}")
-            if comprobar_errores(info_cadastre):
-                cudnp = info_cadastre.get("consulta_dnprcResult", {}).get("control", {}).get("cudnp", 1)
-            
-                if cudnp > 1:
-                    raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
-                else:
-                    self.rc = ''.join(info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('rc').values())
-                    self.url_croquis = requests.get(URL_BASE_CROQUIS_DATOS, params={'refcat': self.rc}).url
-                    self.municipio = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('nm')
-                    self.provincia = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('np')
-                    self.tipo = 'Rústico' if info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('cn') == 'RU' else 'Urbano'
-                    if self.tipo == 'Urbano':
-                        self.calle = f"{info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('tv')} {info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('nv')}"
-                        self.numero = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('pnp')
-                        self.antiguedad = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('debi').get('ant')
-                        self.uso = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('debi').get('luso')
-                    elif self.tipo == 'Rústico':
-                        self.parcela = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('cpp').get('cpa')
-                        self.poligono = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('cpp').get('cpo')
-                        self.nombre_paraje = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('npa')
-                    
-                    self.__create_regions(info_cadastre)
-                    self.__create_geometry(projection)
+        if self._comprobar_errores_catastro(info_cadastre):
+            cudnp = self._obtener_numero_parcelas(info_cadastre, 'dnprc')
+         
+            if cudnp > 1:
+                raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
+            else:
+                self.rc = self._extraer_rc_from_dict(info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('rc'))
+                self.url_croquis = requests.get(URL_BASE_CROQUIS_DATOS, params={'refcat': self.rc}).url
+                self.municipio = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('nm')
+                self.provincia = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('np')
+                self.tipo = 'Rústico' if info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('idbi').get('cn') == 'RU' else 'Urbano'
+                if self.tipo == 'Urbano':
+                    self.calle = f"{info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('tv')} {info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('nv')}"
+                    self.numero = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lous').get('lourb').get('dir').get('pnp')
+                    self.antiguedad = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('debi').get('ant')
+                    self.uso = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('debi').get('luso')
+                elif self.tipo == 'Rústico':
+                    self.parcela = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('cpp').get('cpa')
+                    self.poligono = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('cpp').get('cpo')
+                    self.nombre_paraje = info_cadastre.get('consulta_dnprcResult').get('bico').get('bi').get('dt').get('locs').get('lors').get('lorus').get('npa')
+                
+                self.__create_regions(info_cadastre)
+                self.__create_geometry(projection)
 
-                    self.superficie_construida = sum(float(region.get('superficie')) for region in self.regiones)
-                    self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
-        else:
-            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
-
+                self.superficie_construida = sum(float(region.get('superficie')) for region in self.regiones)
+                self.superficie = sum(float(region.get('superficie')) for region in self.regiones)
+    
     def __create_from_parcel(self, provincia: Union[str,None], municipio: Union[str,None], poligono: Union[str,None], parcela: Union[str,None], projection: str):
         """Create an instance of InfoCatastral from a parcela string."""
-        req = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPPP',
-                           params={
-                               'Provincia': provincia,
-                               'Municipio': municipio,
-                               'Poligono': poligono,
-                               'Parcela': parcela
-                           })
-        if len(req.content) > 0:
-            try:
-                info_cadastre = json.loads(req.content)
-            except:
-                raise ErrorServidorCatastro(mensaje=f"El servidor no devuelve un JSON. Mensaje en bruto: {req1.content}")
-            if comprobar_errores(info_cadastre):
-                cudnp = info_cadastre.get("consulta_dnpppResult", {}).get("control", {}).get("cudnp", 1)
+        params = self._parametrizar_peticion(
+            Provincia=provincia,
+            Municipio=municipio,
+            Poligono=poligono,
+            Parcela=parcela
+        )
+        response = self._llamar_a_api(f'{URL_BASE_CALLEJERO}/Consulta_DNPPP', params)
+        info_cadastre = self._parsear_respuesta(response)
+        
+        if self._comprobar_errores_catastro(info_cadastre):
+            cudnp = self._obtener_numero_parcelas(info_cadastre, 'dnppp')
 
-                if cudnp > 1:
-                    raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
-                else:
-                    self.rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('bico').get('bi').get('idbi').get('rc').values())
-                    self.__create_from_rc(self.rc, projection)
-        else:
-            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
+            if cudnp > 1:
+                raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
+            else:
+                self.rc = self._extraer_rc_from_dict(info_cadastre.get('consulta_dnpppResult').get('bico').get('bi').get('idbi').get('rc'))
+                self.__create_from_rc(self.rc, projection)
 
     def __create_from_address(self, provincia: Union[str,None], municipio: Union[str,None], tipo_via: Union[str,None], calle: Union[str,None], numero: Union[str,None], projection: str):
         """Create an instance of InfoCatastral from an address string."""
@@ -169,37 +265,31 @@ class ParcelaCatastral:
         )
 
         if info_calle:
-            req = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPLOC',
-                               params={
-                                   'Provincia': info_calle.municipio.provincia,
-                                   'Municipio': info_calle.municipio.municipio,
-                                   'Sigla': info_calle.tipo_via,
-                                   'Calle': info_calle.calle,
-                                   'Numero': numero
-                               })
-            
-            if req.status_code == 200 and len(req.content) > 0 and comprobar_errores(req.json()):
-                try:
-                    info_cadastre = json.loads(req1.content)
-                except:
-                    raise ErrorServidorCatastro(mensaje=f"El servidor no devuelve un JSON. Mensaje en bruto: {req1.content}")
-                cudnp = info_cadastre.get("consulta_dnplocResult", {}).get("control", {}).get("cudnp", 1)
+            params = self._parametrizar_peticion(
+                Provincia=info_calle.municipio.provincia,
+                Municipio=info_calle.municipio.municipio,
+                Sigla=info_calle.tipo_via,
+                Calle=info_calle.calle,
+                Numero=numero
+            )
+            response = self._llamar_a_api(f'{URL_BASE_CALLEJERO}/Consulta_DNPLOC', params)
+            info_cadastre = self._parsear_respuesta(response)
+             
+            if self._comprobar_errores_catastro(info_cadastre):
+                cudnp = self._obtener_numero_parcelas(info_cadastre, 'dnploc')
 
                 if cudnp > 1:
                     raise ErrorServidorCatastro(mensaje="Esta parcela tiene varias referencias catastrales. Usa un objeto MetaParcela.")
                 else:
                     if 'lrcdnp' in info_cadastre.get('consulta_dnplocResult'):
-                        self.rc = ''.join(info_cadastre.get('consulta_dnplocResult').get('lrcdnp').get('rcdnp')[0].get('rc').values())
+                        self.rc = self._extraer_rc_from_dict(info_cadastre.get('consulta_dnplocResult').get('lrcdnp').get('rcdnp')[0].get('rc'))
                     elif 'bico' in info_cadastre.get('consulta_dnplocResult'):
-                        self.rc = ''.join(info_cadastre.get('consulta_dnplocResult').get('bico').get('bi').get('idbi').get('rc').values())
+                        self.rc = self._extraer_rc_from_dict(info_cadastre.get('consulta_dnplocResult').get('bico').get('bi').get('idbi').get('rc'))
                     self.__create_from_rc(self.rc, projection)
-            elif 'lerr' in json.loads(req.content).get('consulta_dnplocResult') and json.loads(req.content)['consulta_dnplocResult']['lerr'][0]['cod'] == '43':
-                info_cadastre = json.loads(req.content)
+            elif 'lerr' in info_cadastre.get('consulta_dnplocResult') and info_cadastre['consulta_dnplocResult']['lerr'][0]['cod'] == '43':
                 raise Exception(f"Ese número no existe. Prueba con alguno de estos: {[num.get('num').get('pnp') for num in info_cadastre.get('consulta_dnplocResult').get('numerero').get('nump')]}")
             else:
                 raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
-
-                
         else:
             raise Exception('La calle no existe.')
 
@@ -225,9 +315,11 @@ class ParcelaCatastral:
             raise ValueError("No se ha proporcionado suficiente información para realizar la búsqueda")
         
     @property
-    def distancias_aristas(self):
-        """
-            Calcula las distancias entre dos puntos de la geometría, par a par.
+    def distancias_aristas(self) -> Optional[List[float]]:
+        """Calcula las distancias entre puntos consecutivos de la geometría de la parcela.
+        
+        Returns:
+            Lista de distancias entre aristas consecutivas en metros, o None si no hay geometría.
         """
         if self.geometria:
             distancias = []
@@ -243,9 +335,11 @@ class ParcelaCatastral:
             return None
 
     @property
-    def perimetro(self):
-        """
-            Calcula el perímetro de la geometría
+    def perimetro(self) -> Optional[float]:
+        """Calcula el perímetro total de la geometría de la parcela.
+        
+        Returns:
+            Perímetro total en metros, o None si no hay geometría.
         """
         distancias = self.distancias_aristas
         if distancias:
@@ -253,19 +347,27 @@ class ParcelaCatastral:
         else: 
             return None
 
-    def valor_catastral_urbano_m2(self, anio):
+    def valor_catastral_urbano_m2(self, anio: int) -> Optional[float]:
+        """Obtiene el valor catastral por metro cuadrado para parcelas urbanas.
+        
+        Args:
+            anio: Año del valor catastral a consultar.
+            
+        Returns:
+            Valor catastral en €/m², 0 si es rústica, o None si hay algún error.
+        """
         if self.tipo == 'Rústico':
             return 0
         
-        req = requests.get(f'{URL_BASE_MAPA_VALORES_URBANOS}',
-                               params={
-                                   "huso":"4326",
-                                   "x":self.centroide['x'],
-                                   "y":self.centroide['y'],
-                                   "anyoZV":anio,
-                                   "suelo": "N",
-                                   "tipo_mapa":"vivienda"
-                               })
+        params = self._parametrizar_peticion(
+            huso="4326",
+            x=self.centroide['x'],
+            y=self.centroide['y'],
+            anyoZV=anio,
+            suelo="N",
+            tipo_mapa="vivienda"
+        )
+        req = self._llamar_a_api(f'{URL_BASE_MAPA_VALORES_URBANOS}', params)
 
         values_map = converters.gpd.read_file(req.content)
         centroide_point = Point(self.centroide['x'],self.centroide['y'])
@@ -274,36 +376,15 @@ class ParcelaCatastral:
         return selected_polygon['Ptipo1'].iloc[0].get('val_tipo_m2')
     
     @property
-    def numero_plantas(self):
+    def numero_plantas(self) -> Dict[str, Any]:
+        """Obtiene el número de plantas de un edificio a partir de su referencia catastral.
+        
+        Returns:
+            Diccionario con:
+                - 'plantas': Máximo número de plantas sobre rasante (o None)
+                - 'sotanos': Máximo número de plantas bajo rasante
+                - 'total': Suma de plantas sobre y bajo rasante (o None)
         """
-        Obtiene el número de plantas de un edificio a partir de su
-        referencia catastral usando el WFS INSPIRE de Catastro.
-
-        Criterio:
-        - Se consultan las BuildingPart
-        - Se toma el máximo número de plantas sobre rasante
-        - Se devuelve también el máximo bajo rasante
-
-        Parameters
-        ----------
-        refcat : str
-            Referencia catastral completa (ej: '9795702WG1499N0001AY')
-        timeout : int
-            Timeout de la petición HTTP en segundos
-
-        Returns
-        -------
-        dict
-            {
-                'refcat': str,
-                'parts': int,
-                'max_above_ground': int | None,
-                'max_below_ground': int,
-                'total_floors': int | None,
-                'parts_detail': list
-            }
-        """
-
         if self.tipo == 'Rústico':
             return 0
 
@@ -488,7 +569,7 @@ class ParcelaCatastral:
         """
         converters.to_parquet([self], filename)
         
-class MetaParcela:
+class MetaParcela(ParcelaHelper):
     """
     Clase que representa una MetaParcela, es decir, una gran parcela catastral con 
     varias referencias catastrales (Parcelas Catastrales más pequeñas).
@@ -509,45 +590,71 @@ class MetaParcela:
 
     """
 
-    def __create_from_rc(self, rc: str):
-        """Create an instance of InfoCatastral from a RC (Referencia Catastral) string."""
-        req1 = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPRC',
-                            params={'RefCat': rc})
-
-        if len(req1.content) > 0:
-            info_cadastre = json.loads(req1.content)
-            if comprobar_errores(info_cadastre):
-                self.parcelas = []
-                num_parcelas = info_cadastre.get("consulta_dnprcResult", {}).get("control", {}).get("cudnp", 1)
-                for idx in range(num_parcelas):
-                    rc = ''.join(info_cadastre.get('consulta_dnprcResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
+    def __create_from_rc(self, rc: str) -> None:
+        """Create an instance of MetaParcela from a RC (Referencia Catastral) string.
+        
+        Args:
+            rc: Referencia catastral de la metaparcela
+            
+        Raises:
+            ErrorServidorCatastro: Si el servidor devuelve una respuesta vacía o error
+        """
+        params = self._parametrizar_peticion(RefCat=rc)
+        response = self._llamar_a_api(f'{URL_BASE_CALLEJERO}/Consulta_DNPRC', params)
+        info_cadastre = self._parsear_respuesta(response)
+        
+        if self._comprobar_errores_catastro(info_cadastre):
+            self.parcelas = []
+            num_parcelas = self._obtener_numero_parcelas(info_cadastre, 'dnprc')
+            for idx in range(num_parcelas):
+                rc_dict = info_cadastre.get('consulta_dnprcResult').get('lrcdnp').get('rcdnp')[idx].get('rc')
+                rc = self._extraer_rc_from_dict(rc_dict)
                 self.parcelas.append(ParcelaCatastral(rc=rc))
-        else:
-            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
                 
 
-    def __create_from_parcel(self, provincia: Union[str,None], municipio: Union[str,None], poligono: Union[str,None], parcela: Union[str,None]):
-        """Create an instance of InfoCatastral from a parcela string."""
-        req = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPPP',
-                           params={
-                               'Provincia': provincia,
-                               'Municipio': municipio,
-                               'Poligono': poligono,
-                               'Parcela': parcela
-                           })
-        if len(req.content) > 0:
-            info_cadastre = json.loads(req.content)
-            if comprobar_errores(info_cadastre):
-                self.parcelas = []
-                num_parcelas = info_cadastre.get("consulta_dnpppResult", {}).get("control", {}).get("cudnp", 1)
-                for idx in range(num_parcelas):
-                    rc = ''.join(info_cadastre.get('consulta_dnpppResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
-                    self.parcelas.append(ParcelaCatastral(rc=rc))
-        else:
-            raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
+    def __create_from_parcel(self, provincia: Union[str,None], municipio: Union[str,None], poligono: Union[str,None], parcela: Union[str,None]) -> None:
+        """Create an instance of MetaParcela from parcel data.
+        
+        Args:
+            provincia: Provincia donde se encuentra la parcela
+            municipio: Municipio donde se encuentra la parcela
+            poligono: Número de polígono
+            parcela: Número de parcela
+            
+        Raises:
+            ErrorServidorCatastro: Si el servidor devuelve una respuesta vacía o error
+        """
+        params = self._parametrizar_peticion(
+            Provincia=provincia,
+            Municipio=municipio,
+            Poligono=poligono,
+            Parcela=parcela
+        )
+        response = self._llamar_a_api(f'{URL_BASE_CALLEJERO}/Consulta_DNPPP', params)
+        info_cadastre = self._parsear_respuesta(response)
+        
+        if self._comprobar_errores_catastro(info_cadastre):
+            self.parcelas = []
+            num_parcelas = self._obtener_numero_parcelas(info_cadastre, 'dnppp')
+            for idx in range(num_parcelas):
+                rc_dict = info_cadastre.get('consulta_dnpppResult').get('lrcdnp').get('rcdnp')[idx].get('rc')
+                rc = self._extraer_rc_from_dict(rc_dict)
+                self.parcelas.append(ParcelaCatastral(rc=rc))
 
-    def __create_from_address(self, provincia: Union[str,None], municipio: Union[str,None], tipo_via: Union[str,None], calle: Union[str,None], numero: Union[str,None]):
-        """Create an instance of InfoCatastral from an address string."""
+    def __create_from_address(self, provincia: Union[str,None], municipio: Union[str,None], tipo_via: Union[str,None], calle: Union[str,None], numero: Union[str,None]) -> None:
+        """Create an instance of MetaParcela from an address.
+        
+        Args:
+            provincia: Provincia donde se encuentra la dirección
+            municipio: Municipio donde se encuentra la dirección
+            tipo_via: Tipo de vía (calle, avenida, etc.)
+            calle: Nombre de la calle
+            numero: Número de la dirección
+            
+        Raises:
+            ErrorServidorCatastro: Si el servidor devuelve una respuesta vacía o error
+            Exception: Si la calle no existe
+        """
         info_calle = Calle(
             municipio=Municipio(
                 provincia=provincia,
@@ -558,29 +665,27 @@ class MetaParcela:
         )
 
         if info_calle:
-            req = requests.get(f'{URL_BASE_CALLEJERO}/Consulta_DNPLOC',
-                               params={
-                                   'Provincia': info_calle.municipio.provincia,
-                                   'Municipio': info_calle.municipio.municipio,
-                                   'Sigla': info_calle.tipo_via,
-                                   'Calle': info_calle.calle,
-                                   'Numero': numero
-                               })
+            params = self._parametrizar_peticion(
+                Provincia=info_calle.municipio.provincia,
+                Municipio=info_calle.municipio.municipio,
+                Sigla=info_calle.tipo_via,
+                Calle=info_calle.calle,
+                Numero=numero
+            )
+            response = self._llamar_a_api(f'{URL_BASE_CALLEJERO}/Consulta_DNPLOC', params)
+            info_cadastre = self._parsear_respuesta(response)
             
-            if req.status_code == 200 and len(req.content) > 0 and comprobar_errores(req.json()):
-                info_cadastre = json.loads(req.content)
+            if self._comprobar_errores_catastro(info_cadastre):
                 self.parcelas = []
-                num_parcelas = info_cadastre.get("consulta_dnplocResult", {}).get("control", {}).get("cudnp", 1)
+                num_parcelas = self._obtener_numero_parcelas(info_cadastre, 'dnploc')
                 for idx in range(num_parcelas):
-                    rc = ''.join(info_cadastre.get('consulta_dnplocResult').get('lrcdnp').get('rcdnp')[idx].get('rc').values())
+                    rc_dict = info_cadastre.get('consulta_dnplocResult').get('lrcdnp').get('rcdnp')[idx].get('rc')
+                    rc = self._extraer_rc_from_dict(rc_dict)
                     self.parcelas.append(ParcelaCatastral(rc=rc))
-            else:
-                raise ErrorServidorCatastro("El servidor ha devuelto una respuesta vacia")
-                
         else:
             raise Exception('La calle no existe.')
 
-    def __init__(self, rc: Union[str,None] = None, provincia: Union[int,str,None] = None, municipio: Union[int,str,None] = None, poligono: Union[int,None] = None, parcela: Union[int,None] = None, tipo_via: Union[str,None] = None, calle: Union[str,None] = None, numero: Union[str,None] = None):
+    def __init__(self, rc: Union[str,None] = None, provincia: Union[int,str,None] = None, municipio: Union[int,str,None] = None, poligono: Union[int,None] = None, parcela: Union[int,None] = None, tipo_via: Union[str,None] = None, calle: Union[str,None] = None, numero: Union[str,None] = None) -> None:
         if rc:
             self.rc = rc
             self.__create_from_rc(rc)
@@ -601,8 +706,7 @@ class MetaParcela:
         
 
     def to_dataframe(self):
-        """
-        Convierte la MetaParcela en un DataFrame de pandas.
+        """Convierte la MetaParcela en un DataFrame de pandas.
 
         Returns:
             pd.DataFrame: Un DataFrame que contiene las parcelas de la MetaParcela.
@@ -610,11 +714,10 @@ class MetaParcela:
         return converters.to_geodataframe(self.parcelas)
     
     def to_json(self, filename: Union[str,None] = None) -> str:
-        """
-        Convierte la MetaParcela en un JSON.
+        """Convierte la MetaParcela en un JSON.
 
         Args:
-            filename (Union[str,None], optional): Nombre del archivo donde guardar el JSON. Defaults to None.
+            filename: Nombre del archivo donde guardar el JSON. Defaults to None.
 
         Returns:
             str: Una cadena JSON que contiene las parcelas de la MetaParcela.
@@ -622,32 +725,29 @@ class MetaParcela:
         return converters.to_json(self.parcelas, filename)
     
     def to_csv(self, filename: Union[str,None] = None) -> str:
-        """
-        Convierte la MetaParcela en un CSV.
+        """Convierte la MetaParcela en un CSV.
 
         Args:
-            filename (Union[str,None], optional): Nombre del archivo donde guardar el CSV. Defaults to None.
+            filename: Nombre del archivo donde guardar el CSV. Defaults to None.
 
         Returns:
             str: Una cadena CSV que contiene las parcelas de la MetaParcela.
         """
         return converters.to_csv(self.parcelas, filename)
     
-    def to_shapefile(self, filename: str):
-        """
-        Guarda la MetaParcela como un archivo Shapefile.
+    def to_shapefile(self, filename: str) -> None:
+        """Guarda la MetaParcela como un archivo Shapefile.
 
         Args:
-            filename (str): El nombre del archivo Shapefile a guardar.
+            filename: El nombre del archivo Shapefile a guardar.
         """
         converters.to_shapefile(self.parcelas, filename)
 
-    def to_parquet(self, filename: str):
-        """
-        Guarda la MetaParcela como un archivo Parquet.
+    def to_parquet(self, filename: str) -> None:
+        """Guarda la MetaParcela como un archivo Parquet.
 
         Args:
-            filename (str): El nombre del archivo Parquet a guardar.
+            filename: El nombre del archivo Parquet a guardar.
         """
         converters.to_parquet(self.parcelas, filename)
         
