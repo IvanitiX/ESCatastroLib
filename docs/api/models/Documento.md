@@ -13,5 +13,5 @@ Documento asociado a una parcela catastral (croquis, plano, etc.).
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `url` | `str` | - |
-| `descripcion` | `str` | - |
+| `url` | - | - |
+| `descripcion` | - | - |

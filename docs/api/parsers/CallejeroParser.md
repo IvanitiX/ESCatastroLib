@@ -9,7 +9,7 @@ específicos de cada tipo de consulta.
 
 ## Métodos
 
-### `parse(response: requests.Response)`
+### `parse(response)`
 
 Valida la respuesta HTTP y delega la extracción a ``_to_dtos()``.
 **Argumentos:**

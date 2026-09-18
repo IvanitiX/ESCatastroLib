@@ -21,6 +21,7 @@ SRC_DIR = PROJECT_ROOT / "src" / "escatastrolib"
 DOCS_DIR = Path(__file__).resolve().parent / "api"
 
 MODULES_TO_SCAN = [
+    # Models
     "models/Callejero.py",
     "models/RegionCatastral.py",
     "models/GeometriaCatastral.py",
@@ -29,13 +30,62 @@ MODULES_TO_SCAN = [
     "models/ValorRustico.py",
     "models/Documentacion.py",
     "models/ParcelaCatastral.py",
+    # Clients
+    "clients/base.py",
     "clients/CatastroES.py",
-    "parsers/CatastroES/Callejero/parser.py",
-    "parsers/CatastroES/INSPIREBuildings/parser.py",
-    "parsers/CatastroES/INSPIREParcels/parser.py",
+    "clients/Araba.py",
+    "clients/Bizkaia.py",
+    "clients/Gipuzkoa.py",
+    "clients/Navarra.py",
+    # Services
+    "services/ParcelaCatastral.py",
+    "services/Municipio.py",
+    "services/Calle.py",
+    # Providers
+    "providers/CatastroES/Callejero.py",
+    "providers/CatastroES/CartoCiudad.py",
+    "providers/CatastroES/Coordenadas.py",
+    "providers/CatastroES/Croquis.py",
+    "providers/CatastroES/INSPIREBuildings.py",
+    "providers/CatastroES/INSPIREParcelas.py",
+    "providers/CatastroES/MapaValoresRusticos.py",
+    "providers/CatastroES/MapaValoresUrbanos.py",
+    # Composers
     "composers/ParcelaCatastral.py",
     "composers/mappers/GeometriaMapper.py",
     "composers/mappers/ConstructionMapper.py",
+    "composers/mappers/ParcelaRusticaMapper.py",
+    "composers/mappers/ParcelaUrbanaMapper.py",
+    "composers/mappers/MunicipioMapper.py",
+    "composers/mappers/DocumentoMapper.py",
+    "composers/mappers/CalleMapper.py",
+    "composers/mappers/ValorRusticoMapper.py",
+    "composers/mappers/ValorUrbanoMapper.py",
+    "composers/mappers/RegionCatastralMapper.py",
+    # Parsers
+    "parsers/CatastroES/Callejero/parser.py",
+    "parsers/CatastroES/CartoCiudad/parser.py",
+    "parsers/CatastroES/Coordenadas/parser.py",
+    "parsers/CatastroES/Croquis/parser.py",
+    "parsers/CatastroES/INSPIREBuildings/parser.py",
+    "parsers/CatastroES/INSPIREParcels/parser.py",
+    "parsers/CatastroES/MapaValoresRusticos/parser.py",
+    "parsers/CatastroES/MapaValoresUrbanos/parser.py",
+    "parsers/common/dtos_geometria.py",
+    "parsers/typing.py",
+    # Exporters
+    "exporters/_base.py",
+    "exporters/json_exporter.py",
+    "exporters/csv_exporter.py",
+    "exporters/geojson_exporter.py",
+    "exporters/gis_exporters.py",
+    "exporters/dataframe_exporter.py",
+    # Errors
+    "errors/ErrorServidorDGC.py",
+    # Utils
+    "utils/Mappings.py",
+    "utils/Parsers.py",
+    "utils/territories.py",
 ]
 
 
@@ -43,10 +93,8 @@ def get_module_name(filepath: str) -> str:
     """Obtiene el nombre del módulo (carpeta) a partir de la ruta del archivo."""
     rel = os.path.relpath(filepath, str(SRC_DIR))
     parts = Path(rel).parts
-    if parts[0] in ("models", "clients", "composers"):
-        return parts[0]
-    if parts[0] == "parsers":
-        return "parsers"
+    if parts[0] == "composers" and len(parts) > 2:
+        return "composers/mappers"
     return parts[0]
 
 

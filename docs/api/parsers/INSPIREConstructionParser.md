@@ -12,7 +12,7 @@ La geometría se extrae de ``gml:Surface`` con ``PolygonPatch``.
 
 ## Métodos
 
-### `parse(response: requests.Response)`
+### `parse(response)`
 
 Parsea una respuesta WFS XML de construcciones INSPIRE BU.
 **Argumentos:**

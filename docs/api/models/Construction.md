@@ -14,6 +14,6 @@ Clase base para construcciones catastrales (INSPIRE BU).
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `id` | `str` | - |
-| `geometria` | `Geometria | None` | `None` |
-| `condition` | `str | None` | `None` |
+| `id` | - | - |
+| `geometria` | - | - |
+| `condition` | - | - |

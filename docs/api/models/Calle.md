@@ -14,6 +14,6 @@ Representa una calle dentro de un municipio.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `municipio` | `Municipio` | - |
-| `tipo_via` | `str` | - |
-| `calle` | `str` | - |
+| `municipio` | - | - |
+| `tipo_via` | - | - |
+| `calle` | - | - |

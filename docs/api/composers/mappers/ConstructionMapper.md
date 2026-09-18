@@ -1,6 +1,6 @@
 # ConstructionMapper
 
-**Módulo:** `composers`
+**Módulo:** `composers/mappers`
 
 Mapper que dispatcha DTOs de construcción a sus modelos de dominio.
 Detecta el tipo de DTO (BuildingPart, Building, OtherConstruction)

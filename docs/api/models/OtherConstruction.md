@@ -15,4 +15,4 @@ Representa construcciones como garajes, trasteros, piscinas, etc.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `naturaleza` | `str | None` | `None` |
+| `naturaleza` | - | - |

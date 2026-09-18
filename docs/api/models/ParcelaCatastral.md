@@ -28,20 +28,20 @@ construcciones, geometría, documentación y valoraciones.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `referencia_catastral` | `str` | - |
-| `municipio` | `Municipio` | - |
-| `tipo` | `str` | - |
-| `completo` | `bool` | - |
-| `superficie_plana` | `float` | - |
-| `superficie_construida` | `float` | - |
-| `datos_urbanos` | `ParcelaUrbana | None` | - |
-| `datos_rusticos` | `ParcelaRustica | None` | - |
-| `regiones` | `list[RegionCatastral] | None` | - |
-| `construcciones` | `list[Construction] | None` | - |
-| `geometria` | `Geometria | None` | - |
-| `documentacion` | `list[Documento] | None` | - |
-| `valor_urbano` | `ValorUrbano | None` | - |
-| `valor_rustico` | `ValorRustico | None` | - |
+| `referencia_catastral` | - | - |
+| `municipio` | - | - |
+| `tipo` | - | - |
+| `completo` | - | - |
+| `superficie_plana` | - | - |
+| `superficie_construida` | - | - |
+| `datos_urbanos` | - | - |
+| `datos_rusticos` | - | - |
+| `regiones` | - | - |
+| `construcciones` | - | - |
+| `geometria` | - | - |
+| `documentacion` | - | - |
+| `valor_urbano` | - | - |
+| `valor_rustico` | - | - |
 
 ## Métodos
 

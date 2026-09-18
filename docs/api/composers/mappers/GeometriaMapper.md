@@ -1,6 +1,6 @@
 # GeometriaMapper
 
-**Módulo:** `composers`
+**Módulo:** `composers/mappers`
 
 Mapper que convierte GeometriaDTO a Geometria (modelo de dominio).
 Transforma la lista de puntos del DTO en tuplas de coordenadas
