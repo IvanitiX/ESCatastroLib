@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.ValorRustico import ValorRustico
 from ...parsers.CatastroES.MapaValoresRusticos.dto import ValoresRusticosDTO

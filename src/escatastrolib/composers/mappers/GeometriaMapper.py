@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.GeometriaCatastral import Geometria
 from ...parsers.common.dtos_geometria import GeometriaDTO

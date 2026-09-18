@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.Documentacion import Documento
 from ...parsers.CatastroES.Croquis.dto import CroquisDTO

@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.ParcelaCatastral import ParcelaRustica
 from ...parsers.CatastroES.Callejero.dto import ParcelaCatastralDTO

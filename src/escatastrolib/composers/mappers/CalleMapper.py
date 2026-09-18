@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.Callejero import Calle, Municipio
 from ...parsers.CatastroES.Callejero.dto import CalleDTO

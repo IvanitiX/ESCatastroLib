@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.RegionCatastral import RegionCatastral
 from ...parsers.CatastroES.Callejero.dto import RegionCatastralDTO

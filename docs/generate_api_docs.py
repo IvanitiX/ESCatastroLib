@@ -9,8 +9,6 @@ docstrings estilo Google (Args, Returns, Raises, Example) como Markdown
 listo para wiki.
 """
 
-from __future__ import annotations
-
 import ast
 import os
 import re

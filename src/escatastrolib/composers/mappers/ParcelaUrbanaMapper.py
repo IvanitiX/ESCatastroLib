@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.ParcelaCatastral import ParcelaUrbana
 from ...models.Callejero import Calle, Municipio

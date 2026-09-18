@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.ValorUrbano import ValorUrbano
 from ...parsers.CatastroES.MapaValoresUrbanos.dto import ValorUrbanoDTO

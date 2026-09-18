@@ -1,8 +1,6 @@
 import json
 import os
-import tempfile
-
-import pytest
+import tempfileimport pytest
 
 from escatastrolib.models.Callejero import Calle, Municipio
 from escatastrolib.models.Construction import Building, BuildingPart

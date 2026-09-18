@@ -1,4 +1,4 @@
-from __future__ import annotations
+
 
 from ...models.Construction import Building, BuildingPart, Construction, OtherConstruction
 from ...parsers.CatastroES.INSPIREBuildings.dto import ConstructionBaseDTO
