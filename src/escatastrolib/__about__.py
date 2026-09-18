@@ -1,4 +1,1 @@
-# SPDX-FileCopyrightText: 2025-present Iván V.R <IvanVR@protonmail.com>
-#
-# SPDX-License-Identifier: MIT
-__version__ = '1.0.0'
+__version__ = "2.0.0"
