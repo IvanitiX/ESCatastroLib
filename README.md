@@ -6,44 +6,17 @@ Una librería de Python para consultar los datos del Catastro de España en base
 
 Con respecto a la v1 de ESCatastroLib, ahora la librería se basa una arquitectura por capas que separa las responsabilidades:
 
-```
-┌─────────────────────────────────────────────┐
-│  services/          (Facade de alto nivel)  │
-├─────────────────────────────────────────────┤
-│  clients/           (Clientes HTTP)         │
-├─────────────────────────────────────────────┤
-│  composers/         (Composición de DTOs)   │
-├─────────────────────────────────────────────┤
-│  parsers/           (Parseo XML/JSON)       │
-├─────────────────────────────────────────────┤
-│  providers/         (HTTP SOAP/REST)        │
-├─────────────────────────────────────────────┤
-│  models/            (Modelos de dominio)    │
-├─────────────────────────────────────────────┤
-│  exporters/         (JSON, CSV, GeoJSON...) │
-└─────────────────────────────────────────────┘
-```
+|Path|¿Qué lleva?| Más info|
+|----|-----------|---------|
+|services/|Facade de alto nivel, agnóstico a territorio (casi todo lo llevarás desde aquí)|[Documentación](./docs/api/services/)|
+|clients/|Clientes por territorios|[Documentación](./docs/api/clients/)|
+|composers/|Composición de DTO a modelos comunes|[Documentación](./docs/api/composers/)|
+|parsers/|Parseo XML/JSON a DTOS|[Documentación](./docs/api/parsers/)|
+|providers/|Todas las peticiones HTTP SOAP/REST|[Documentación](./docs/api/providers/)|
+|models/|Modelos de dominio comunes|[Documentación](./docs/api/models/)|
+|exporters/|Exportación de parcelas a JSON, CSV, GeoJSON... (algunos requieren módulos extra)|[Documentación](./docs/api//exporters/)|
 
-### Providers
-Conectores HTTP de bajo nivel que interactúan con las APIs del Catastro.
 
-### Parsers
-Transforman las respuestas XML/JSON en DTOs internos.
-
-### Composers
-Combinan y transforman DTOs en modelos de negocio.
-
-### Models
-Dataclasses del dominio: ParcelaCatastral, Geometria, etc.
-
-### Clients
-Capa de alto nivel que orquesta providers + parsers + composers.
-
-### Services
-Facade más alto: una sola llamada para obtener una parcela completa.
-
-### Exporters
-Serialización a JSON, CSV, GeoJSON, GeoPackage, Shapefile, DataFrame.
 
 ## Instalación
 
@@ -82,15 +55,16 @@ from escatastrolib.exporters import to_geojson
 to_geojson(parcela.parcelas,"parcela_geo.json")
 ```
 
-## Licencia
+# ¿Cómo puedo contribuir?
+Sigue las instrucciones de CONTRIBUTING.md y el Código de Conducta.
 
-Apache License 2.0 - Ver [LICENSE](LICENSE) para más detalles.
-
-## Contribuir
-
-Sigue las instrucciones de [CONTRIBUTING.md](CONTRIBUTING.md) y el [Código de Conducta](CODE_OF_CONDUCT.md).
-
-## Agradecimientos
-
+# Agradecimientos
 - Al Catastro por hacer un Endpoint público.
-- A GISCE-TI por currarse [una librería similar](https://github.com/gisce/pycatastro), basándose en los endpoints JSON.
+- A GISCE-TI por currarse [una librería similar][1], basándose en los endpoints JSON.
+- A mi abuelo y mi tío por pedirme que os eche una mano buscando tierras.
+- A [Juanlu Cano][2] por darme la idea de extender el primer concepto en la PyConES para convertirlo en esta librería.
+- A [Jaime Gómez-Obregón][3] por animar de forma muuuy indirecta a "hackear las Administraciones públicas".
+
+[1]: https://github.com/gisce/pycatastro
+[2]: https://github.com/astrojuanlu
+[3]: https://github.com/JaimeObregon
