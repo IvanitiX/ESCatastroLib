@@ -6,6 +6,11 @@ from ...parsers.CatastroES.Callejero.dto import ParcelaCatastralDTO
 
 
 class ParcelaUrbanaMapper:
+    """Mapper para convertir DTOs de parcela urbana a modelos de dominio.
+
+    Transforma los DTOs de parcelas catastrales urbanas en objetos
+    ParcelaUrbana con información de dirección, antigüedad, uso y valor m².
+    """
     @staticmethod
     def map(dto: ParcelaCatastralDTO, municipio: Municipio, valor_m2: float = 0.0) -> ParcelaUrbana:
         calle_completa = dto.calle or ""

@@ -3,6 +3,14 @@ import requests
 from ...errors.ErrorServidorDGC import comprobar_errores
 
 class CallejeroAPIProvider:
+    """Provider para consultas al Catastro de España sobre callejero.
+
+    Proporciona métodos para consultar provincias, municipios, calles
+    y parcelas a través del servicio web del Catastro.
+
+    Attributes:
+        URL_BASE: URL base del servicio de callejero del Catastro.
+    """
     URL_BASE = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json'
 
     @comprobar_errores

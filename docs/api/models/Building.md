@@ -21,9 +21,9 @@ su uso, unidades, viviendas y una lista de BuildingPart que lo componen.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `uso_actual` | - | - |
-| `num_unidades` | - | - |
-| `num_viviendas` | - | - |
-| `num_plantas_sup` | - | - |
-| `area_oficial` | - | - |
-| `building_parts` | - | - |
+| `uso_actual` | `str | None` | `None` |
+| `num_unidades` | `int | None` | `None` |
+| `num_viviendas` | `int | None` | `None` |
+| `num_plantas_sup` | `int | None` | `None` |
+| `area_oficial` | `float | None` | `None` |
+| `building_parts` | `list[BuildingPart]` | `field(default_factory=list)` |

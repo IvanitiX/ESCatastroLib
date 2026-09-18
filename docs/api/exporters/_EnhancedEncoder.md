@@ -8,7 +8,7 @@ Encoder JSON que maneja dataclasses y tipos no serializables.
 
 ## Métodos
 
-### `default(o)`
+### `default(o: Any)`
 
 *Sin documentación.*
 

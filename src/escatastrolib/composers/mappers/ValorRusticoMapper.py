@@ -5,6 +5,11 @@ from ...parsers.CatastroES.MapaValoresRusticos.dto import ValoresRusticosDTO
 
 
 class ValorRusticoMapper:
+    """Mapper para convertir DTOs de valores rústicos a modelos de dominio.
+
+    Transforma los DTOs del mapa de valores rústicos del Catastro en
+    objetos ValorRustico con los valores por m² de diferentes tipos de cultivo.
+    """
     @staticmethod
     def map(dto: ValoresRusticosDTO) -> ValorRustico:
         return ValorRustico(

@@ -18,13 +18,13 @@ o no información opcional (geometrías, valores, regiones, etc.).
 
 ## Métodos
 
-### `__init__(include_geometries, include_values, include_regions, include_constructions, include_documentation)`
+### `__init__(include_geometries: bool, include_values: bool = False, include_regions: bool = False, include_constructions: bool = False, include_documentation: bool = False)`
 
 *Sin documentación.*
 
 ---
 
-### `compose(parcela_dto, completo, geometria_dto, croquis_dtos, valor_urbano_dto, valor_rustico_dto, construcciones_dtos)`
+### `compose(parcela_dto: ParcelaCatastralDTO, completo: bool = False, geometria_dto: INSPIREParcelDTO | None = None, croquis_dtos: list[CroquisDTO] | None = None, valor_urbano_dto: ValorUrbanoDTO | None = None, valor_rustico_dto: ValoresRusticosDTO | None = None, construcciones_dtos: list[ConstructionBaseDTO] | None = None)`
 
 Ensbla un modelo ParcelaCatastral completo desde DTOs.
 Orquesta la transformación de todos los DTOs obtenidos de las APIs

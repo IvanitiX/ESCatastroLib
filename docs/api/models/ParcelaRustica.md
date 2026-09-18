@@ -15,7 +15,7 @@ Datos específicos de una parcela de tipo rústico.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `poligono` | - | - |
-| `parcela` | - | - |
-| `nombre_paraje` | - | - |
-| `valor_m2` | - | - |
+| `poligono` | `int` | - |
+| `parcela` | `int` | - |
+| `nombre_paraje` | `str` | - |
+| `valor_m2` | `float` | - |

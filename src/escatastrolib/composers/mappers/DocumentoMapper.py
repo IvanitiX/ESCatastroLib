@@ -5,6 +5,11 @@ from ...parsers.CatastroES.Croquis.dto import CroquisDTO
 
 
 class DocumentoMapper:
+    """Mapper para convertir DTOs de documentos a modelos de dominio.
+
+    Transforma los DTOs de croquis y otros documentos del Catastro
+    en objetos Documento del modelo de dominio.
+    """
     @staticmethod
     def map(dto: CroquisDTO) -> Documento:
         return Documento(

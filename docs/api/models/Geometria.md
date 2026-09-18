@@ -17,9 +17,9 @@ propiedades calculadas de área y perímetro.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `sistema_referencia` | - | - |
-| `coordenadas` | - | - |
-| `tipo` | - | - |
+| `sistema_referencia` | `str` | - |
+| `coordenadas` | `list` | - |
+| `tipo` | `str` | - |
 
 ## Métodos
 

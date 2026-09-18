@@ -5,6 +5,11 @@ from ...parsers.CatastroES.Callejero.dto import ParcelaCatastralDTO
 
 
 class ParcelaRusticaMapper:
+    """Mapper para convertir DTOs de parcela rústica a modelos de dominio.
+
+    Transforma los DTOs de parcelas catastrales rústicas en objetos
+    ParcelaRustica con la información de polígono, parcela y valor m².
+    """
     @staticmethod
     def map(dto: ParcelaCatastralDTO, valor_m2: float = 0.0) -> ParcelaRustica:
         return ParcelaRustica(

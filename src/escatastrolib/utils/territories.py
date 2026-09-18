@@ -3,6 +3,11 @@ from enum import Enum
 
 
 class Territorio(Enum):
+    """Enumeración de territorios con sistema catastral propio.
+
+    Identifica los diferentes territorios de España que tienen
+    sistemas catastrales diferenciados (nacional, forales).
+    """
     ESPANA = "espana"
     NAVARRA = "navarra"
     GUIPUZKOA = "gipuzkoa"

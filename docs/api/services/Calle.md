@@ -24,7 +24,7 @@ y lanza excepciones con sugerencias si no se encuentra.
 
 ## Métodos
 
-### `__init__(municipio, nombre_calle, tipo_via)`
+### `__init__(municipio: Municipio, nombre_calle: str | None, tipo_via: str | None = None)`
 
 *Sin documentación.*
 

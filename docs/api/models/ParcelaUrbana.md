@@ -16,8 +16,8 @@ Datos específicos de una parcela de tipo urbano.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `calle` | - | - |
-| `numero` | - | - |
-| `antiguedad` | - | - |
-| `uso` | - | - |
-| `valor_m2` | - | - |
+| `calle` | `Calle` | - |
+| `numero` | `int` | - |
+| `antiguedad` | `int` | - |
+| `uso` | `str` | - |
+| `valor_m2` | `float` | - |

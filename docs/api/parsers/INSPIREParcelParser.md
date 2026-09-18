@@ -11,7 +11,7 @@ de parcelas. Recupera:
 
 ## Métodos
 
-### `parse(response)`
+### `parse(response: requests.Response)`
 
 Parsea una respuesta WFS XML de parcelas INSPIRE CP.
 **Argumentos:**

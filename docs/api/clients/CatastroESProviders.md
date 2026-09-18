@@ -22,11 +22,11 @@ complementarios.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `callejero` | - | - |
-| `cartociudad` | - | - |
-| `coordenadas` | - | - |
-| `inspire_parcelas` | - | - |
-| `inspire_buildings` | - | - |
-| `valores_urbanos` | - | - |
-| `valores_rusticos` | - | - |
-| `croquis` | - | - |
+| `callejero` | `CallejeroAPIProvider` | - |
+| `cartociudad` | `CartoCiudadProvider` | - |
+| `coordenadas` | `CoordenadasAPIProvider` | - |
+| `inspire_parcelas` | `InspireParcelasProvider` | - |
+| `inspire_buildings` | `InspireBuildingsProvider` | - |
+| `valores_urbanos` | `MapaValoresUrbanosProvider` | - |
+| `valores_rusticos` | `MapaValoresRusticosProvider` | - |
+| `croquis` | `CroquisAPIProvider` | - |

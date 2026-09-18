@@ -2,6 +2,15 @@ import requests
 
 
 class InspireBuildingsProvider:
+    """Provider para consultas INSPIRE de edificios y construcciones.
+
+    Proporciona métodos para consultar información de edificios,
+    partes de edificios y otras construcciones asociadas a parcelas
+    catastrales utilizando el estándar INSPIRE/WFS.
+
+    Attributes:
+        URL_BASE: URL base del servicio WFS de edificios INSPIRE.
+    """
     URL_BASE = "https://ovc.catastro.meh.es/INSPIRE/wfsBU.aspx"
 
     def consulta_partes_edificios(self, rc: str, srsname: str = "EPSG:4326") -> requests.Response:

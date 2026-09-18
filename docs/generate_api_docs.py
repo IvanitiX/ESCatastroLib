@@ -384,9 +384,12 @@ def main():
     if DOCS_DIR.exists():
         for f in DOCS_DIR.rglob("*.md"):
             f.unlink()
-        for d in reversed(list(DOCS_DIR.iterdir())):
+        for d in reversed(list(DOCS_DIR.rglob("*"))):
             if d.is_dir():
-                d.rmdir()
+                try:
+                    d.rmdir()
+                except OSError:
+                    pass
 
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -6,6 +6,12 @@ from .dto import RecintoValorUrbanoDTO, ValorUrbanoDTO
 
 
 class ValoresUrbanosParser:
+    """Parser para valores catastrales urbanos.
+
+    Parsea las respuestas JSON del servicio de mapa de valores urbanos
+    del Catastro y extrae los valores de suelo, construcción y catastrales
+    de los inmuebles urbanos.
+    """
     def parse(self, response: requests.Response) -> list[RecintoValorUrbanoDTO]:
         response.raise_for_status()
 

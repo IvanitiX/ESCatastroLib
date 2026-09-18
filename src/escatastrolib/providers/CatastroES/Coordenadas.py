@@ -3,6 +3,14 @@ import requests
 from ...errors.ErrorServidorDGC import comprobar_errores
 
 class CoordenadasAPIProvider:
+    """Provider para consultas de coordenadas del Catastro de España.
+
+    Proporciona métodos para convertir entre referencias catastrales (RC)
+    y coordenadas geográficas, así como obtener coordenadas de parcelas.
+
+    Attributes:
+        URL_BASE: URL base del servicio de coordenadas del Catastro.
+    """
     URL_BASE = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCoordenadas.svc/json'
     
 

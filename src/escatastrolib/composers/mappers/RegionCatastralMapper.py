@@ -5,6 +5,11 @@ from ...parsers.CatastroES.Callejero.dto import RegionCatastralDTO
 
 
 class RegionCatastralMapper:
+    """Mapper para convertir DTOs de regiones catastrales a modelos de dominio.
+
+    Transforma los DTOs de regiones catastrales (elementos de una parcela)
+    en objetos RegionCatastral, concatenando descripción, escalera, planta y puerta.
+    """
     @staticmethod
     def map(dto: RegionCatastralDTO) -> RegionCatastral:
         desc_parts = [dto.descripcion]

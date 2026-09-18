@@ -17,9 +17,9 @@ Valoración de suelo urbano procedente del Mapa de Valores del Catastro.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `tipologia` | - | - |
-| `superficie` | - | - |
-| `val_suelo` | - | - |
-| `val_construccion` | - | - |
-| `val_catastral` | - | - |
-| `val_tipo_m2` | - | - |
+| `tipologia` | `str | None` | `None` |
+| `superficie` | `float | None` | `None` |
+| `val_suelo` | `float | None` | `None` |
+| `val_construccion` | `float | None` | `None` |
+| `val_catastral` | `float | None` | `None` |
+| `val_tipo_m2` | `float | None` | `None` |

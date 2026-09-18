@@ -1,10 +1,10 @@
 # ESCatastroLib
 
-Una librería de Python para consultar los datos del Catastro de España y obtener información geográfica precisa. Con esta librería, puedes acceder a datos como la ubicación de parcelas, características de construcción y valores geográficos.
+Una librería de Python para consultar los datos del Catastro de España en base a objetos y obtener información geográfica precisa. Con esta librería, puedes acceder a datos como la ubicación de parcelas, características de construcción y valores geográficos.
 
-## Arquitectura v2
+## Arquitectura: ¡Ahora con capas!
 
-ESCatastroLib v2 utiliza una arquitectura por capas que separa las responsabilidades:
+Con respecto a la v1 de ESCatastroLib, ahora la librería se basa una arquitectura por capas que separa las responsabilidades:
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -48,6 +48,7 @@ Serialización a JSON, CSV, GeoJSON, GeoPackage, Shapefile, DataFrame.
 ## Instalación
 
 ```bash
+# Soporta todo la arquitectura y las exportaciones a CSV y (Geo)JSON
 pip install escatastrolib
 ```
 
@@ -70,20 +71,16 @@ pip install escatastrolib[all]
 from escatastrolib.services import ParcelaCatastral
 
 # Obtener una parcela por referencia catastral
-parcela = ParcelaCatastral.from_rc('28067A023001490000FJ')
+parcela = ParcelaCatastral(rc='28067A023001490000FJ')
 
 # Exportar a JSON
-parcela.to_json("parcela.json")
+from escatastrolib.exporters import to_json
+json_parcela = to_json(parcela.parcelas)
 
-# Exportar a GeoJSON
-parcela.to_geojson("parcela.geojson")
+# Exportar a GeoJSON, guardado en disco
+from escatastrolib.exporters import to_geojson
+to_geojson(parcela.parcelas,"parcela_geo.json")
 ```
-
-## Requisitos
-
-- Python >= 3.10
-- shapely >= 2.0.0
-- pyproj >= 3.0.0
 
 ## Licencia
 

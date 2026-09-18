@@ -16,5 +16,5 @@ rústica concreta.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `descripcion` | - | - |
-| `superficie` | - | - |
+| `descripcion` | `str` | - |
+| `superficie` | `float` | - |

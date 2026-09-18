@@ -10,7 +10,7 @@ Atributos:
 
 ## Métodos
 
-### `__init__(mensaje)`
+### `__init__(mensaje: str)`
 
 *Sin documentación.*
 

@@ -5,6 +5,11 @@ import requests
 from .dto import ValoresRusticosDTO
 
 class ValoresRusticosParser:
+    """Parser para valores catastrales rústicos.
+
+    Parsea las respuestas JSON del servicio de mapa de valores rústicos
+    del Catastro y extrae los valores por m² de diferentes tipos de cultivo.
+    """
      def parse(self, response: requests.Response) -> list[ValoresRusticosDTO]:
         response.raise_for_status()
 

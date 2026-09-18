@@ -7,7 +7,7 @@ en objetos CartoCiudadDTO.
 
 ## Métodos
 
-### `parse(response)`
+### `parse(response: requests.Response)`
 
 *Sin documentación.*
 

@@ -30,7 +30,7 @@ parcelas = client.obtener_parcela_por_rc("12345678901234AA1234F")
 
 ## Métodos
 
-### `__init__(proyeccion, include_geometries, include_values, anio_valores, include_regions, include_constructions, include_documentation, force_complete)`
+### `__init__(proyeccion: str = 'EPSG:4326', include_geometries: bool = False, include_values: bool = False, anio_valores: int | None = None, include_regions: bool = False, include_constructions: bool = False, include_documentation: bool = False, force_complete: bool = False)`
 
 *Sin documentación.*
 
@@ -46,7 +46,7 @@ Consulta la lista de provincias españolas del Catastro.
 
 ---
 
-### `buscar_municipios(provincia, municipio)`
+### `buscar_municipios(provincia: str, municipio: str)`
 
 Busca municipios por provincia y nombre.
 **Argumentos:**
@@ -61,7 +61,7 @@ Busca municipios por provincia y nombre.
 
 ---
 
-### `buscar_calles(provincia, municipio, tipo_via, nombre_calle)`
+### `buscar_calles(provincia: str, municipio: str, tipo_via: str, nombre_calle: str = '')`
 
 Busca calles dentro de un municipio.
 **Argumentos:**
@@ -78,7 +78,7 @@ Busca calles dentro de un municipio.
 
 ---
 
-### `geocodificar(direccion, municipio)`
+### `geocodificar(direccion: str, municipio: str)`
 
 Geocodifica una dirección usando CartoCiudad.
 Convierte una dirección textual en coordenadas geográficas y
@@ -95,7 +95,7 @@ referencia catastral.
 
 ---
 
-### `rc_por_coordenadas(lat, lon)`
+### `rc_por_coordenadas(lat: float, lon: float)`
 
 Obtiene la referencia catastral a partir de coordenadas geográficas.
 **Argumentos:**
@@ -110,7 +110,7 @@ Obtiene la referencia catastral a partir de coordenadas geográficas.
 
 ---
 
-### `coordenadas_por_rc(rc)`
+### `coordenadas_por_rc(rc: str)`
 
 Convierte una referencia catastral a coordenadas geográficas.
 **Argumentos:**
@@ -124,7 +124,7 @@ Convierte una referencia catastral a coordenadas geográficas.
 
 ---
 
-### `obtener_parcela_por_rc(rc)`
+### `obtener_parcela_por_rc(rc: str)`
 
 Obtiene la información completa de una parcela por su referencia catastral.
 Este es el método principal para obtener datos de una parcela. Si
@@ -141,7 +141,7 @@ documentación), realiza las consultas adicionales necesarias.
 
 ---
 
-### `obtener_parcela_por_polpar(provincia, municipio, poligono, parcela)`
+### `obtener_parcela_por_polpar(provincia: str, municipio: str, poligono: int, parcela: int)`
 
 Obtiene información de parcelas por polígono y número de parcela.
 Busca todas las parcelas dentro de un polígono catastral de un municipio.
@@ -161,7 +161,7 @@ individualmente cada parcela por RC para obtener datos completos.
 
 ---
 
-### `obtener_parcela_por_direccion(provincia, municipio, tipo_via, calle, numero)`
+### `obtener_parcela_por_direccion(provincia: str, municipio: str, tipo_via: str, calle: str, numero: str)`
 
 Obtiene información de una parcela por su dirección completa.
 Busca la parcela que se encuentra en la dirección indicada. Si

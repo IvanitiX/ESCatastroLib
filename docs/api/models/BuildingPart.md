@@ -18,6 +18,6 @@ plantas y altura subterránea.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `num_plantas_sup` | - | - |
-| `num_plantas_inf` | - | - |
-| `altura_inf` | - | - |
+| `num_plantas_sup` | `int | None` | `None` |
+| `num_plantas_inf` | `int | None` | `None` |
+| `altura_inf` | `float | None` | `None` |

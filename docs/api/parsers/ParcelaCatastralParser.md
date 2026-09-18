@@ -14,7 +14,7 @@ los datos específicos accordingly.
 
 ## Métodos
 
-### `parse(response)`
+### `parse(response: requests.Response)`
 
 Parsea la respuesta de una consulta de parcela catastral.
 Determina automáticamente la cardinalidad del resultado (único o

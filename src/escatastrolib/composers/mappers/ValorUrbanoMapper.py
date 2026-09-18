@@ -5,6 +5,11 @@ from ...parsers.CatastroES.MapaValoresUrbanos.dto import ValorUrbanoDTO
 
 
 class ValorUrbanoMapper:
+    """Mapper para convertir DTOs de valores urbanos a modelos de dominio.
+
+    Transforma los DTOs del mapa de valores urbanos del Catastro en
+    objetos ValorUrbano con información de tipología, superficie y valores.
+    """
     @staticmethod
     def map(dto: ValorUrbanoDTO) -> ValorUrbano:
         return ValorUrbano(

@@ -13,5 +13,5 @@ Representa un municipio español con su provincia.
 
 | Atributo | Tipo | Default |
 |----------|------|---------|
-| `municipio` | - | - |
-| `provincia` | - | - |
+| `municipio` | `str` | - |
+| `provincia` | `str` | - |

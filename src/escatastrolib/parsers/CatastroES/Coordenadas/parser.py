@@ -3,6 +3,11 @@ import requests
 from .dto import CentroideDTO, RefCatDTO
 
 class CoordenadasParser:
+    """Parser base para respuestas de coordenadas del Catastro.
+
+    Proporciona métodos comunes para parsear respuestas JSON del servicio
+    de coordenadas del Catastro y convertirlas en DTOs.
+    """
     def parse(self, response: requests.Response) -> list[CentroideDTO | RefCatDTO]:
         response.raise_for_status()
 
@@ -19,6 +24,11 @@ class CoordenadasParser:
         return self._to_dtos(data)
 
 class RCaCoordenadasParser(CoordenadasParser):
+    """Parser para convertir referencias catastrales a coordenadas.
+
+    Parsea las respuestas del servicio Consulta_CPMRC del Catastro
+    y extrae las coordenadas geográficas de una referencia catastral.
+    """
     def parse(self, response: requests.Response) -> list[CentroideDTO]:
         return super().parse(response)
     
@@ -39,6 +49,11 @@ class RCaCoordenadasParser(CoordenadasParser):
         return lista_dtos
 
 class CoordenadasaRCParser(CoordenadasParser):
+    """Parser para convertir coordenadas a referencias catastrales.
+
+    Parsea las respuestas del servicio Consulta_RCCOOR del Catastro
+    y extrae las referencias catastrales correspondientes a unas coordenadas.
+    """
     def parse(self, response: requests.Response) -> list[RefCatDTO]:
         return super().parse(response)
     
