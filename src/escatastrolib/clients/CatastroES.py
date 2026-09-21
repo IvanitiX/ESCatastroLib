@@ -280,7 +280,7 @@ class CatastroESClient(BaseCatastroClient):
             list[ParcelaCatastral]: Lista de parcelas encontradas.
         """
         response = self.providers.callejero.consulta_parcela_por_polpar(
-            provincia, municipio, poligono, parcela
+            provincia=provincia, municipio=municipio, poligono=poligono, parcela=parcela
         )
         return self._obtener_parcelas(response, ParcelaCatastralPolParParser())
 
@@ -302,7 +302,7 @@ class CatastroESClient(BaseCatastroClient):
             list[ParcelaCatastral]: Lista de parcelas encontradas en la dirección.
         """
         response = self.providers.callejero.consulta_parcela_por_direccion(
-            provincia, municipio, tipo_via, calle, numero
+            provincia=provincia, municipio=municipio, tipo_via=tipo_via, calle=calle, numero=numero
         )
         return self._obtener_parcelas(response, ParcelaCatastralDirParser())
 
