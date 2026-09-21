@@ -6,11 +6,6 @@ from datetime import datetime
 from typing import Any
 
 @dataclass
-class RecintoValorUrbanoDTO:
-    ptipos: list[ValorUrbanoDTO]
-    geometry: dict[str, Any] | None = None
-
-@dataclass
 class ValorUrbanoDTO:
     # Identificación
     id_producto_tipo: str | None = None
@@ -56,3 +51,8 @@ class ValorUrbanoDTO:
     val_tipo_mostrar: str | None = None
     val_estandar: float | None = None
     val_estandar_m2: float | None = None
+
+@dataclass
+class RecintoValorUrbanoDTO:
+    ptipos: list[ValorUrbanoDTO]
+    geometry: dict[str, Any] | None = None
