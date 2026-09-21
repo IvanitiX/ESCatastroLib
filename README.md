@@ -2,6 +2,17 @@
 
 La librería ESCatastroLib proporciona una interfaz sencilla para consultar el Catastro de España y obtener información geográfica precisa. Con esta librería, puedes acceder a datos como la ubicación de parcelas, características de construcción y valores geográficos.
 
+> [!IMPORTANT]
+>
+> **Migrando a Codeberg**
+> 
+> Debido a [las políticas de Microsoft y Github establecidas en Marzo del 2026](https://github.blog/changelog/2026-03-25-updates-to-our-privacy-statement-and-terms-of-service-how-we-use-your-data/)
+> y a pesar del opt-out, se está moviendo el desarrollo principal de esta librería a [Codeberg](https://codeberg.org/IvanInVR/ESCatastroLib)
+> 
+> De momento, las versiones principales seguirán pasándose por aqui y los issues se moverán de GitHub a Codeberg, pero
+> si la forja va bien se irá moviendo toda esa atención allí.
+> 
+
 # Clases
 
 ## Clase Municipio
