@@ -290,8 +290,8 @@ class RegionCatastralParser:
             localizacion_adicional = localizacion_municipal.get('lourb',{})
 
             lista_dtos.append(RegionCatastralDTO(
-                descripcion=f"{construccion.get('lcd')} - {construccion.get('dvcons').get('dtip')}",
-                superficie=construccion.get('dfcons').get('stl'),
+                descripcion=f"{construccion.get('lcd')} - {construccion.get('dvcons',{}).get('dtip','')}",
+                superficie=construccion.get('dfcons',{}).get('stl'),
                 escalera=localizacion_adicional.get('loint',{}).get('es'),
                 planta=localizacion_adicional.get('loint',{}).get('pt'),
                 puerta=localizacion_adicional.get('loint',{}).get('pu')
@@ -305,8 +305,8 @@ class RegionCatastralParser:
 
         for cultivo in data:
             lista_dtos.append(RegionCatastralDTO(
-                descripcion=cultivo.get('dspr').get('dcc'),
-                superficie=cultivo.get('dspr').get('ssp'),
+                descripcion=cultivo.get('dspr',{}).get('dcc'),
+                superficie=cultivo.get('dspr',{}).get('ssp'),
                 escalera=None,
                 planta=None,
                 puerta=None
