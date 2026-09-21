@@ -10,7 +10,7 @@ class ValoresRusticosParser:
     Parsea las respuestas JSON del servicio de mapa de valores rústicos
     del Catastro y extrae los valores por m² de diferentes tipos de cultivo.
     """
-     def parse(self, response: requests.Response) -> list[ValoresRusticosDTO]:
+    def parse(self, response: requests.Response) -> list[ValoresRusticosDTO]:
         response.raise_for_status()
 
         try:
@@ -25,11 +25,11 @@ class ValoresRusticosParser:
 
         return self._to_dtos(data)
      
-     def _to_dtos(self, data: dict[str, Any]) -> list[ValoresRusticosDTO]:
-         features = data.get('features',{})
-         lista_dtos = []
+    def _to_dtos(self, data: dict[str, Any]) -> list[ValoresRusticosDTO]:
+        features = data.get('features',{})
+        lista_dtos = []
 
-         for feature in features:
+        for feature in features:
             propiedades = feature.get('properties',{})
 
             lista_dtos.append(ValoresRusticosDTO(
@@ -55,4 +55,4 @@ class ValoresRusticosParser:
                 valor_m2_vinedos_secano=propiedades.get('VIS')
             ))
 
-         return lista_dtos
+        return lista_dtos
