@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any
 
 from ..models.ParcelaCatastral import ParcelaCatastral
-from ._base import _geometria_to_wkt, _make_crs_transformer
+from ._base import _geometria_to_wkt, _invert_coords, _make_crs_transformer
 
 
 def to_geopackage(
@@ -11,6 +11,7 @@ def to_geopackage(
     path: str | Path | None = None,
     *,
     target_crs: str = "EPSG:4326",
+    invert_coordinates: bool = False,
 ) -> Path:
     """Exporta parcelas a un archivo GeoPackage.
 
@@ -22,6 +23,7 @@ def to_geopackage(
         parcelas: Lista de modelos ParcelaCatastral.
         path: Ruta del archivo de salida (.gpkg). Debe proporcionarse.
         target_crs: CRS de salida. Default EPSG:4326 (WGS84).
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Path del archivo creado.
@@ -100,6 +102,9 @@ def to_geopackage(
 
             shapely_geom = shapely_transform(transformer.transform, shapely_geom)
 
+        if invert_coordinates:
+            shapely_geom = _invert_coords(shapely_geom)
+
         from fudgeo.geometry import Polygon
 
         rings = [list(shapely_geom.exterior.coords)]
@@ -136,6 +141,7 @@ def to_shapefile(
     path: str | Path | None = None,
     *,
     target_crs: str = "EPSG:4326",
+    invert_coordinates: bool = False,
 ) -> Path:
     """Exporta parcelas a un archivo Shapefile.
 
@@ -149,6 +155,7 @@ def to_shapefile(
         path: Ruta del directorio de salida (Shapefile genera varios archivos).
             Debe proporcionarse.
         target_crs: CRS de salida. Default EPSG:4326 (WGS84).
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Path del archivo creado.
@@ -217,6 +224,9 @@ def to_shapefile(
             from shapely.ops import transform as shapely_transform
 
             shapely_geom = shapely_transform(transformer.transform, shapely_geom)
+
+        if invert_coordinates:
+            shapely_geom = _invert_coords(shapely_geom)
 
         coords = list(shapely_geom.exterior.coords)
         w.poly([coords])

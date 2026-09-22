@@ -386,7 +386,7 @@ class CatastroESClient(BaseCatastroClient):
         )
         xs, ys = [], []
         for punto in geometria_dto.puntos:
-            x, y = transformer.transform(float(punto.coordenadas[0]), float(punto.coordenadas[1]))
+            x, y = transformer.transform(float(punto.coordenadas[1]), float(punto.coordenadas[0]))
             xs.append(x)
             ys.append(y)
         return f"{min(xs)},{min(ys)},{max(xs)},{max(ys)}"

@@ -9,7 +9,12 @@ from ..models.ParcelaCatastral import ParcelaCatastral
 from ._base import _EnhancedEncoder
 
 
-def _serialize_parcela(parcela: ParcelaCatastral, include_geometry: bool) -> dict:
+def _serialize_parcela(
+    parcela: ParcelaCatastral,
+    include_geometry: bool,
+    *,
+    invert_coordinates: bool = False,
+) -> dict:
     """Serializa una parcela catastral a diccionario.
 
     Convierte el modelo de dominio a un diccionario con anidamiento
@@ -19,6 +24,7 @@ def _serialize_parcela(parcela: ParcelaCatastral, include_geometry: bool) -> dic
     Args:
         parcela: Modelo de dominio ParcelaCatastral.
         include_geometry: Si True, incluye la geometría serializada.
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Diccionario con los campos de la parcela.
@@ -27,6 +33,17 @@ def _serialize_parcela(parcela: ParcelaCatastral, include_geometry: bool) -> dic
 
     if not include_geometry:
         data["geometria"] = None
+    elif invert_coordinates and parcela.geometria is not None:
+        shapely_geom = parcela.geometria.to_shapely()
+        if shapely_geom is not None:
+            from ..exporters._base import _invert_coords
+
+            inverted = _invert_coords(shapely_geom)
+            data["geometria"] = {
+                "sistema_referencia": parcela.geometria.sistema_referencia,
+                "tipo": parcela.geometria.tipo,
+                "coordenadas": list(inverted.coords) if parcela.geometria.tipo == "Point" else list(inverted.exterior.coords),
+            }
 
     return data
 
@@ -38,6 +55,7 @@ def to_json(
     include_geometry: bool = True,
     include_constructions: bool = True,
     indent: int = 2,
+    invert_coordinates: bool = False,
 ) -> str | Path:
     """Serializa parcelas a JSON.
 
@@ -51,13 +69,16 @@ def to_json(
         include_geometry: Si True, incluye la geometría de cada parcela.
         include_constructions: Si True, incluye las construcciones anidadas.
         indent: Nivel de indentación del JSON.
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Cadena JSON si path es None, o Path del archivo creado.
     """
     data = []
     for parcela in parcelas:
-        d = _serialize_parcela(parcela, include_geometry)
+        d = _serialize_parcela(
+            parcela, include_geometry, invert_coordinates=invert_coordinates
+        )
         if not include_constructions:
             d["construcciones"] = None
         data.append(d)

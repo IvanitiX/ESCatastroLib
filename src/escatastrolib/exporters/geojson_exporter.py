@@ -17,6 +17,8 @@ def _parcela_to_feature(
     transformer: Any | None,
     coordinate_precision: int,
     include_constructions: bool,
+    *,
+    invert_coordinates: bool = False,
 ) -> dict:
     """Convierte una parcela a un Feature GeoJSON.
 
@@ -29,6 +31,7 @@ def _parcela_to_feature(
         transformer: Transformer de pyproj para reproyección, o None.
         coordinate_precision: Decimales para las coordenadas.
         include_constructions: Si True, incluye construcciones en properties.
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Diccionario GeoJSON Feature.
@@ -37,7 +40,10 @@ def _parcela_to_feature(
         ValueError: Si la parcela no tiene geometría.
     """
     geometry = _geometria_to_geojson_dict(
-        parcela.geometria, transformer=transformer, precision=coordinate_precision
+        parcela.geometria,
+        transformer=transformer,
+        precision=coordinate_precision,
+        invert_coordinates=invert_coordinates,
     )
     if geometry is None:
         raise ValueError(
@@ -93,6 +99,7 @@ def to_geojson(
     target_crs: str = "EPSG:4326",
     include_constructions: bool = True,
     coordinate_precision: int = 6,
+    invert_coordinates: bool = False,
 ) -> dict | Path:
     """Convierte parcelas a GeoJSON FeatureCollection.
 
@@ -108,6 +115,7 @@ def to_geojson(
         target_crs: CRS de salida. Default EPSG:4326 (WGS84).
         include_constructions: Si True, incluye construcciones en properties.
         coordinate_precision: Decimales para las coordenadas.
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Diccionario GeoJSON si path es None, o Path del archivo creado.
@@ -126,6 +134,7 @@ def to_geojson(
             transformer=transformer,
             coordinate_precision=coordinate_precision,
             include_constructions=include_constructions,
+            invert_coordinates=invert_coordinates,
         )
         features.append(feature)
 

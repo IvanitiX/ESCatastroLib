@@ -1,6 +1,8 @@
 import json
 import os
-import tempfileimport pytest
+import tempfile
+
+import pytest
 
 from escatastrolib.models.Callejero import Calle, Municipio
 from escatastrolib.models.Construction import Building, BuildingPart
@@ -534,3 +536,67 @@ class TestToDataframe:
             path = os.path.join(tmpdir, "out.xyz")
             with pytest.raises(ValueError, match="Formato no soportado"):
                 to_dataframe(parcelas, path, format="xyz")
+
+
+# ── invert_coordinates ──────────────────────────────────────
+
+
+class TestInvertCoordinates:
+    """Tests para la opción invert_coordinates en todos los exportadores."""
+
+    def test_geojson_invert_coordinates(self, parcelas):
+        from escatastrolib.exporters import to_geojson
+
+        result = to_geojson(parcelas, invert_coordinates=True)
+        coords = result["features"][0]["geometry"]["coordinates"][0]
+        for lon, lat in coords:
+            assert -10 < lon < 0
+            assert 35 < lat < 45
+
+    def test_geojson_default_no_invert(self, parcelas):
+        from escatastrolib.exporters import to_geojson
+
+        result = to_geojson(parcelas)
+        coords = result["features"][0]["geometry"]["coordinates"][0]
+        for x, y in coords:
+            assert 35 < x < 45
+            assert -10 < y < 0
+
+    def test_json_invert_coordinates(self, parcelas):
+        from escatastrolib.exporters import to_json
+
+        data = json.loads(to_json(parcelas, invert_coordinates=True))
+        coords = data[0]["geometria"]["coordenadas"]
+        for lon, lat in coords:
+            assert -10 < lon < 0
+            assert 35 < lat < 45
+
+    def test_csv_invert_coordinates(self, parcelas):
+        from escatastrolib.exporters import to_csv
+
+        csv_str = to_csv(parcelas, invert_coordinates=True)
+        assert "POLYGON" in csv_str
+
+    def test_dataframe_invert_coordinates(self, parcelas):
+        from escatastrolib.exporters import to_dataframe
+
+        df = to_dataframe(parcelas, invert_coordinates=True)
+        assert "geometria_wkt" in df.columns
+        assert df["geometria_wkt"].str.contains("POLYGON").any()
+
+    def test_geopackage_invert_coordinates(self, parcelas):
+        from escatastrolib.exporters import to_geopackage
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "out.gpkg")
+            result = to_geopackage(parcelas, path, invert_coordinates=True)
+            assert os.path.exists(path)
+            assert os.path.getsize(path) > 0
+
+    def test_shapefile_invert_coordinates(self, parcelas):
+        from escatastrolib.exporters import to_shapefile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "out")
+            result = to_shapefile(parcelas, path, invert_coordinates=True)
+            assert os.path.exists(path + ".shp")

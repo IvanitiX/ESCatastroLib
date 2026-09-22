@@ -18,11 +18,30 @@ from ..models.ValorRustico import ValorRustico
 from ..models.ValorUrbano import ValorUrbano
 
 
-def _geometria_to_wkt(geom: Geometria | None) -> str:
+def _invert_coords(shapely_geom: Any) -> Any:
+    """Invierte las coordenadas de una geometría Shapely (lat,lon) a (lon,lat).
+
+    Args:
+        shapely_geom: Geometría Shapely (Point, Polygon, etc.).
+
+    Returns:
+        Nueva geometría con coordenadas invertidas.
+    """
+    from shapely.ops import transform as shapely_transform
+
+    return shapely_transform(lambda x, y: (y, x), shapely_geom)
+
+
+def _geometria_to_wkt(
+    geom: Geometria | None,
+    *,
+    invert_coordinates: bool = False,
+) -> str:
     """Convierte una geometría catastral a WKT.
 
     Args:
         geom: Geometría catastral o None.
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Cadena WKT de la geometría, o cadena vacía si no hay geometría.
@@ -32,6 +51,8 @@ def _geometria_to_wkt(geom: Geometria | None) -> str:
     shapely_geom = geom.to_shapely()
     if shapely_geom is None:
         return ""
+    if invert_coordinates:
+        shapely_geom = _invert_coords(shapely_geom)
     return shapely_geom.wkt
 
 
@@ -39,6 +60,8 @@ def _geometria_to_geojson_dict(
     geom: Geometria | None,
     transformer: Any | None = None,
     precision: int = 6,
+    *,
+    invert_coordinates: bool = False,
 ) -> dict | None:
     """Convierte una geometría catastral a diccionario GeoJSON.
 
@@ -49,6 +72,7 @@ def _geometria_to_geojson_dict(
         geom: Geometría catastral o None.
         transformer: Transformer de pyproj para reproyección, o None.
         precision: Número de decimales para las coordenadas.
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Diccionario GeoJSON con ``type`` y ``coordinates``, o None.
@@ -59,6 +83,9 @@ def _geometria_to_geojson_dict(
     shapely_geom = geom.to_shapely()
     if shapely_geom is None:
         return None
+
+    if invert_coordinates:
+        shapely_geom = _invert_coords(shapely_geom)
 
     if transformer is not None:
         from shapely.ops import transform as shapely_transform

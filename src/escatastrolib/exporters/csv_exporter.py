@@ -7,7 +7,12 @@ from ..models.ParcelaCatastral import ParcelaCatastral
 from ._base import _geometria_to_wkt
 
 
-def _parcela_to_row(parcela: ParcelaCatastral, include_geometry: bool) -> dict:
+def _parcela_to_row(
+    parcela: ParcelaCatastral,
+    include_geometry: bool,
+    *,
+    invert_coordinates: bool = False,
+) -> dict:
     """Convierte una parcela a diccionario plano para CSV.
 
     Aplana la estructura de la parcela a un solo nivel. La geometría
@@ -17,6 +22,7 @@ def _parcela_to_row(parcela: ParcelaCatastral, include_geometry: bool) -> dict:
     Args:
         parcela: Modelo de dominio ParcelaCatastral.
         include_geometry: Si True, incluye columna con geometría WKT.
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
 
     Returns:
         Diccionario plano con los campos de la parcela.
@@ -51,14 +57,16 @@ def _parcela_to_row(parcela: ParcelaCatastral, include_geometry: bool) -> dict:
         row["nombre_paraje"] = ""
 
     if parcela.valor_urbano:
-        row["val_catastral"] = parcela.valor_urbano.val_catastral
+        row["val_catastral"] = parcela.valor_urbano.val_tipo_m2
     elif parcela.valor_rustico:
-        row["val_catastral"] = parcela.valor_rustico.region
+        row["val_catastral"] = parcela.valor_rustico.nombre_region
     else:
         row["val_catastral"] = ""
 
     if include_geometry:
-        row["geometria_wkt"] = _geometria_to_wkt(parcela.geometria)
+        row["geometria_wkt"] = _geometria_to_wkt(
+            parcela.geometria, invert_coordinates=invert_coordinates
+        )
 
     return row
 
@@ -68,6 +76,7 @@ def to_csv(
     path: str | Path | None = None,
     *,
     include_geometry: bool = True,
+    invert_coordinates: bool = False,
     delimiter: str = ",",
 ) -> str | Path:
     """Exporta parcelas a CSV.
@@ -80,6 +89,7 @@ def to_csv(
         parcelas: Lista de modelos ParcelaCatastral.
         path: Ruta del archivo de salida. Si es None, devuelve la cadena CSV.
         include_geometry: Si True, incluye columna con geometría WKT.
+        invert_coordinates: Si True, invierte coordenadas de (lat,lon) a (lon,lat).
         delimiter: Delimitador del CSV.
 
     Returns:
@@ -92,7 +102,10 @@ def to_csv(
         Path(path).write_text(csv_str, encoding="utf-8")
         return Path(path)
 
-    rows = [_parcela_to_row(p, include_geometry) for p in parcelas]
+    rows = [
+        _parcela_to_row(p, include_geometry, invert_coordinates=invert_coordinates)
+        for p in parcelas
+    ]
     fieldnames = list(rows[0].keys())
 
     from io import StringIO
