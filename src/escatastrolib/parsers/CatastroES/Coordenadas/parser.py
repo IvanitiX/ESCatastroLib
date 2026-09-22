@@ -1,5 +1,7 @@
 import requests
 
+from ...typing import to_str
+
 from .dto import CentroideDTO, RefCatDTO
 
 class CoordenadasParser:
@@ -68,7 +70,7 @@ class CoordenadasaRCParser(CoordenadasParser):
             pc1 = item.get('pc').get('pc1')
             pc2 = item.get('pc').get('pc2')
             lista_dtos.append(RefCatDTO(
-                rc=f"{pc1}{pc2}"
+                rc=to_str(f"{pc1}{pc2}")
             ))
 
         return lista_dtos

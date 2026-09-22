@@ -4,7 +4,7 @@ import requests
 import xmltodict
 
 from .dto import GeometriaDTO, PuntoDTO, INSPIREParcelDTO
-from ...typing import to_int
+from ...typing import to_int, to_float
 
 class INSPIREParcelParser:
     """Parser de respuestas INSPIRE CP (Cadastral Parcels) en formato WFS XML.
@@ -101,5 +101,5 @@ class INSPIREParcelParser:
           return INSPIREParcelDTO(
                 geometria=self._parse_geometry_list(cp.get('cp:geometry')),
                 centroide=self._parse_reference_point(cp.get('cp:referencePoint')),
-                area=cp.get('cp:areaValue',{}).get('#text')
+                area=to_float(cp.get('cp:areaValue',{}).get('#text'))
           )
