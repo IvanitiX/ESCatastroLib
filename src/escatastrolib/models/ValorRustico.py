@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-
-
 @dataclass
 class ValorRustico:
     """Valoración de suelo rústico por tipo de cultivo y región.
@@ -51,3 +49,12 @@ class ValorRustico:
     valor_m2_olivares_regadio: float = 0.0
     valor_m2_prados: float = 0.0
     valor_m2_pastizales: float = 0.0
+
+    @property
+    def valor_promedio(self) -> float:
+        return (sum([self.valor_m2_arrozales, self.valor_m2_citricos, self.valor_m2_cultivos_bajo_plastico,
+             self.valor_m2_cultivos_subtropicales_tropicales, self.valor_m2_frutales_carnosos_regadio,
+             self.valor_m2_frutales_carnosos_secano, self.valor_m2_frutos_secos_regadio, self.valor_m2_frutos_secos_secano,
+             self.valor_m2_huertos, self.valor_m2_olivares_regadio, self.valor_m2_pastizales, self.valor_m2_plataneras,
+             self.valor_m2_prados, self.valor_m2_tierras_arables_regadio, self.valor_m2_tierras_arables_secano,
+             self.valor_m2_vinedos_regadio, self.valor_m2_vinedos_secano])/18)

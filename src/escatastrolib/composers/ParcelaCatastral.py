@@ -59,7 +59,7 @@ class ParcelaCatastralComposer:
         geometria_dto: INSPIREParcelDTO | None = None,
         croquis_dtos: list[CroquisDTO] | None = None,
         valor_urbano_dto: ValorUrbanoDTO | None = None,
-        valor_rustico_dto: ValoresRusticosDTO | None = None,
+        valor_rustico_dto: list[ValoresRusticosDTO] | None = None,
         construcciones_dtos: list[ConstructionBaseDTO] | None = None,
     ) -> ParcelaCatastral:
         """Ensbla un modelo ParcelaCatastral completo desde DTOs.
@@ -103,7 +103,7 @@ class ParcelaCatastralComposer:
                 valor_urbano = ValorUrbanoMapper.map(valor_urbano_dto)
                 valor_m2 = valor_urbano_dto.val_tipo_m2 or 0.0
             elif valor_rustico_dto:
-                valor_rustico = ValorRusticoMapper.map(valor_rustico_dto)
+                valor_rustico = ValorRusticoMapper.map(valor_rustico_dto[0])
 
         datos_urbanos = None
         datos_rusticos = None
