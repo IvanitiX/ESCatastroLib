@@ -57,6 +57,7 @@ class ParcelaCatastral:
         tipo_via: str | None = None,
         calle: str | None = None,
         numero: str | None = None,
+        query_direccion: str | None = None,
         projection: str = "EPSG:4326",
         include_geometries: bool = False,
         include_values: bool = False,
@@ -78,7 +79,7 @@ class ParcelaCatastral:
         )
         self._cliente = None
         self._territorio: Territorio | None = None
-        self.parcelas: list[Any] = []
+        self.resultados: list[Any] = []
 
         if rc:
             self._create_from_rc(rc)
@@ -86,11 +87,13 @@ class ParcelaCatastral:
             self._create_from_parcel(provincia, municipio, poligono, parcela)
         elif provincia and municipio and tipo_via and calle and numero:
             self._create_from_address(provincia, municipio, tipo_via, calle, numero)
+        elif query_direccion and municipio:
+            self._create_from_rc(rc=self.geocodificar(query_direccion, municipio).referencia_catastral)
         else:
             raise ValueError(
                 "No se ha proporcionado suficiente información para realizar la búsqueda. "
-                "Usa rc, o provincia+municipio+poligono+parcela, o "
-                "provincia+municipio+tipo_via+calle+numero."
+                "Usa rc, o provincia+municipio+poligono+parcela; o "
+                "provincia+municipio+tipo_via+calle+numero; o query_direccion+municipio."
             )
 
     # ── Client management ───────────────────────────────────
@@ -136,22 +139,22 @@ class ParcelaCatastral:
     def _create_from_rc(self, rc: str) -> None:
         territorio = detectar_territorio(rc)
         if territorio == Territorio.DESCONOCIDO:
-            self.parcelas = self._trial_and_error("obtener_parcela_por_rc", rc)
+            self.resultados = self._trial_and_error("obtener_parcela_por_rc", rc)
         else:
             self._usar_cliente(territorio)
-            self.parcelas = self._cliente.obtener_parcela_por_rc(rc)
+            self.resultados = self._cliente.obtener_parcela_por_rc(rc)
 
     def _create_from_parcel(self, provincia: str, municipio: str, poligono: int, parcela: int) -> None:
         territorio = territorio_por_provincia(provincia)
         self._usar_cliente(territorio)
-        self.parcelas = self._cliente.obtener_parcela_por_polpar(
+        self.resultados = self._cliente.obtener_parcela_por_polpar(
             provincia, municipio, poligono, parcela
         )
 
     def _create_from_address(self, provincia: str, municipio: str, tipo_via: str, calle: str, numero: str) -> None:
         territorio = territorio_por_provincia(provincia)
         self._usar_cliente(territorio)
-        self.parcelas = self._cliente.obtener_parcela_por_direccion(
+        self.resultados = self._cliente.obtener_parcela_por_direccion(
             provincia, municipio, tipo_via, calle, numero
         )
 
@@ -183,7 +186,7 @@ class ParcelaCatastral:
 
     def geocodificar(self, direccion: str, municipio: str) -> Any:
         """Geocodifica una dirección usando CartoCiudad."""
-        self._requiere_cliente()
+        self._usar_cliente(territorio=Territorio.ESPANA)
         return self._cliente.geocodificar(direccion, municipio)
 
     # ── Coordenadas (delegates) ─────────────────────────────
