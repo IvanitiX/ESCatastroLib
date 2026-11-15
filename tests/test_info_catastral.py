@@ -18,6 +18,15 @@ def test_valid_info_rustic_catastral_initialization_rc():
     assert info.poligono == '23'
 
 
+def test_urban_parcel_without_buildings_rc():
+    # Suelo urbano sin edificar: el Catastro no devuelve el bloque 'lcons'
+    # (sfc '0', luso 'Obras de urbanización y jardineria, suelos sin edificar').
+    info = ParcelaCatastral(rc='8063095UH3986S0001XB')
+    assert info.rc == '8063095UH3986S0001XB'
+    assert info.tipo == 'Urbano'
+    assert info.regiones == []
+    assert info.superficie_total > 0
+
 def test_invalid_info_catastral_initialization_rc():
     with pytest.raises(ErrorServidorCatastro):
         ParcelaCatastral(rc='22113U490470815583UK')  # Invalid RC

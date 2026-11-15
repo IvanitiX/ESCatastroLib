@@ -149,10 +149,12 @@ class ParcelaCatastral(ParcelaHelper):
             regiones: Lista de diccionarios con 'descripcion' y 'superficie' de cada región.
         """
         self.regiones = []
+        # El suelo sin edificar no trae construcciones: el Catastro omite el bloque
+        # 'lcons' (urbano) o 'lspr' (rústico). Sin él, la parcela no tiene regiones.
         if self.tipo == 'Urbano':
-            iterator = list(info_cadastre.values())[0].get('bico').get('lcons')
+            iterator = list(info_cadastre.values())[0].get('bico').get('lcons') or []
         elif self.tipo == 'Rústico':
-            iterator = list(info_cadastre.values())[0].get('bico').get('lspr')
+            iterator = list(info_cadastre.values())[0].get('bico').get('lspr') or []
         for region in iterator:
             if self.tipo == 'Rústico':
                 self.regiones.append({
